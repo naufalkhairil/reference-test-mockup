@@ -66,3 +66,14 @@ skills/
 
 - Citations are only as good as the reference — the skill does not fabricate page numbers or quotations.
 - Before returning the mockup, it self-checks question count, answer key correctness, source support, and that every answer stays inside its collapsible block.
+
+## Streamlit mockup viewer
+
+This repository also includes a Streamlit site for browsing and taking the Markdown quizzes in `mockup-test/`.
+
+```bash
+python -m pip install -r requirements.txt
+streamlit run app.py
+```
+
+The app discovers quiz files from `mockup-test/` at startup. Add a Markdown mockup there to include it in the chapter selector.
