@@ -6,18 +6,18 @@ Choose the single best answer for each question.
 
 A user tries to make the bot role-play a finance director to reveal restricted expense standards. What attack does the lesson identify?
 
-A. Prompt injection.
+A. Data poisoning.
 
-B. Data poisoning.
+B. Model quantization.
 
 C. DDoS.
 
-D. Model quantization.
+D. Prompt injection.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 The prompt attempts to manipulate the model’s behavior and bypass its intended restrictions.
 
@@ -30,11 +30,11 @@ A request combines a legitimate database lookup with an appended SQL UPDATE. Wha
 
 A. Command injection against an agent’s tool behavior.
 
-B. A prompt template formatting error.
+B. An image moderation failure.
 
-C. A vector embedding collision.
+C. A prompt template formatting error.
 
-D. An image moderation failure.
+D. A vector embedding collision.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -50,18 +50,18 @@ The lesson describes malicious commands embedded in a legitimate request as comm
 
 Why is a keyword blacklist an inadequate long-term defense?
 
-A. Attackers can use synonyms or obfuscation, and the list becomes costly to maintain.
+A. It always blocks every encoded attack.
 
-B. It prevents the application from using APIs.
+B. It cannot inspect text input.
 
-C. It always blocks every encoded attack.
+C. Attackers can use synonyms or obfuscation, and the list becomes costly to maintain.
 
-D. It cannot inspect text input.
+D. It prevents the application from using APIs.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 The lesson explains that paraphrases and encoding evade fixed lists while maintaining the list becomes an arms race.
 
@@ -72,18 +72,18 @@ The lesson explains that paraphrases and encoding evade fixed lists while mainta
 
 What advantage does AI Guardrails provide over relying only on the LLM to refuse unsafe content?
 
-A. A dedicated service can return structured detection results that let an application reliably stop execution.
+A. It makes the LLM’s output impossible to vary.
 
-B. It makes the LLM’s output impossible to vary.
+B. It replaces authorization for database tools.
 
-C. It replaces authorization for database tools.
+C. It trains the model on private data.
 
-D. It trains the model on private data.
+D. A dedicated service can return structured detection results that let an application reliably stop execution.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 The lesson emphasizes stable structured feedback for applications and consistent input/output risk review.
 
@@ -98,9 +98,9 @@ A. `query_security_check_intl` and `response_security_check_intl`.
 
 B. `prompt_vector_intl` and `completion_cache_intl`.
 
-C. `input_sql_update` and `output_email_send`.
+C. `text_embedding` and `image_generation`.
 
-D. `text_embedding` and `image_generation`.
+D. `input_sql_update` and `output_email_send`.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -116,18 +116,18 @@ The notebook uses the query check for input and response check for generated out
 
 A company needs to block proprietary project codes in addition to built-in detections. What should it configure?
 
-A. A private lexicon associated with the relevant protection rule.
+A. A public FAQ entry.
 
-B. A larger model context window.
+B. A private lexicon associated with the relevant protection rule.
 
-C. A public FAQ entry.
+C. A larger model context window.
 
 D. A lower top-p value.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Custom sensitive terms can be stored in a private lexicon and linked to query or response rules.
 
@@ -138,18 +138,18 @@ Custom sensitive terms can be stored in a private lexicon and linked to query or
 
 What response label indicates that a configured private lexicon rule was triggered?
 
-A. `customized`.
+A. `training-data`.
 
-B. `nonLabel`.
+B. `pass-through`.
 
-C. `pass-through`.
+C. `customized`.
 
-D. `training-data`.
+D. `nonLabel`.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 The lesson says a custom rule can be verified by `label: customized`.
 
@@ -160,9 +160,9 @@ The lesson says a custom rule can be verified by `label: customized`.
 
 What can the multimodal protection example inspect?
 
-A. Image content and text within images, along with the supplied text.
+A. Only filenames and image dimensions.
 
-B. Only filenames and image dimensions.
+B. Image content and text within images, along with the supplied text.
 
 C. Only generated audio.
 
@@ -171,7 +171,7 @@ D. Database query syntax.
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 The lesson describes multimodal moderation for image content and text in images.
 
@@ -182,18 +182,18 @@ The lesson describes multimodal moderation for image content and text in images.
 
 An image moderation result says `No risk detected` and `Suggestion: pass`. What does the notebook advise?
 
-A. The image is considered safe by that check, and the application can decide whether to allow it.
+A. The image should always be rejected.
 
-B. The model must be retrained.
+B. The image is considered safe by that check, and the application can decide whether to allow it.
 
 C. The request was a prompt injection.
 
-D. The image should always be rejected.
+D. The model must be retrained.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 The example interprets this result as safe and leaves the allow decision to the application.
 
@@ -208,9 +208,9 @@ A. Data poisoning.
 
 B. DDoS.
 
-C. Command injection.
+C. Context caching.
 
-D. Context caching.
+D. Command injection.
 
 <details>
 <summary>Show answer and explanation</summary>

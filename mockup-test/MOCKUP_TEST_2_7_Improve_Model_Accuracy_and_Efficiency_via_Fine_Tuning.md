@@ -6,18 +6,18 @@ Choose the single best answer for each question.
 
 When is fine-tuning most suitable according to the lesson’s motivation?
 
-A. When a model needs better performance on a specific domain or task using representative examples.
+A. To make every model larger.
 
 B. Whenever a prompt has not yet been tested.
 
-C. When private documents only need to be retrieved at query time.
+C. When a model needs better performance on a specific domain or task using representative examples.
 
-D. To make every model larger.
+D. When private documents only need to be retrieved at query time.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 Fine-tuning adapts model behavior to domain/task examples; it is distinct from retrieving changing knowledge.
 
@@ -28,18 +28,18 @@ Fine-tuning adapts model behavior to domain/task examples; it is distinct from r
 
 A company’s policy documents change often. Which approach is generally better for supplying current facts?
 
-A. RAG over the updated documents.
+A. Increase temperature.
 
 B. Fine-tune once and never update.
 
-C. Increase temperature.
+C. RAG over the updated documents.
 
 D. Use a larger training epoch count.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 Frequently changing factual knowledge is more naturally kept current through retrieval.
 
@@ -52,9 +52,9 @@ What is supervised fine-tuning data typically organized as?
 
 A. Examples pairing an input or instruction with a desired output.
 
-B. A list of API keys and endpoints.
+B. Unlabeled GPU utilization metrics only.
 
-C. Unlabeled GPU utilization metrics only.
+C. A list of API keys and endpoints.
 
 D. A vector index with no text.
 
@@ -74,11 +74,11 @@ Why should fine-tuning examples be high quality and representative?
 
 A. The model learns patterns from them, so poor or narrow examples can teach the wrong behavior.
 
-B. They make the tokenizer unnecessary.
+B. They automatically update the knowledge base.
 
 C. They ensure the model never needs evaluation.
 
-D. They automatically update the knowledge base.
+D. They make the tokenizer unnecessary.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -94,18 +94,18 @@ Data quality and coverage shape the learned behavior and generalization.
 
 What is the purpose of splitting data into training and validation or test subsets?
 
-A. Train on one portion and assess generalization on examples not used for fitting.
+A. Make all examples identical.
 
 B. Increase the number of training epochs.
 
-C. Make all examples identical.
+C. Avoid measuring model quality.
 
-D. Avoid measuring model quality.
+D. Train on one portion and assess generalization on examples not used for fitting.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 Held-out data helps reveal whether the model generalizes beyond the examples it learned from.
 
@@ -116,18 +116,18 @@ Held-out data helps reveal whether the model generalizes beyond the examples it 
 
 What does a LoRA fine-tuning approach aim to reduce?
 
-A. The number of trainable parameters and resource requirements compared with updating all model weights.
+A. The need for a base model.
 
-B. The amount of text in each training example to zero.
+B. The ability to save model checkpoints.
 
-C. The need for a base model.
+C. The amount of text in each training example to zero.
 
-D. The ability to save model checkpoints.
+D. The number of trainable parameters and resource requirements compared with updating all model weights.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 LoRA uses parameter-efficient adaptation rather than full-model updates.
 
@@ -138,18 +138,18 @@ LoRA uses parameter-efficient adaptation rather than full-model updates.
 
 A fine-tuned model performs well on training examples but poorly on new questions. What is the likely issue?
 
-A. Overfitting or inadequate data coverage.
+A. An API endpoint mismatch by definition.
 
-B. Successful generalization.
+B. Overfitting or inadequate data coverage.
 
-C. An API endpoint mismatch by definition.
+C. Successful generalization.
 
 D. Too much retrieval context.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 A train-test gap suggests memorization or insufficient representative data.
 
@@ -160,18 +160,18 @@ A train-test gap suggests memorization or insufficient representative data.
 
 Why compare the fine-tuned model against the base model on the same held-out cases?
 
-A. To determine whether fine-tuning actually improves the target behavior.
+A. To ensure their outputs are identical.
 
-B. To change the model architecture.
+B. To determine whether fine-tuning actually improves the target behavior.
 
 C. To avoid reference answers.
 
-D. To ensure their outputs are identical.
+D. To change the model architecture.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 A controlled comparison shows whether adaptation improves outcomes for the intended task.
 
@@ -182,18 +182,18 @@ A controlled comparison shows whether adaptation improves outcomes for the inten
 
 What is a useful reason to preserve checkpoints during fine-tuning?
 
-A. They allow recovery, comparison, or deployment of a selected training state.
+A. They replace evaluation.
 
-B. They automatically encrypt every dataset.
+B. They allow recovery, comparison, or deployment of a selected training state.
 
-C. They replace evaluation.
+C. They increase the base model context window.
 
-D. They increase the base model context window.
+D. They automatically encrypt every dataset.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Checkpoints preserve model states that can be compared or restored.
 
@@ -206,11 +206,11 @@ A small fine-tuned model is cheaper and faster, but slightly less capable. What 
 
 A. Measured task quality alongside latency and cost requirements.
 
-B. Parameter count alone.
+B. The model’s name alone.
 
-C. The model’s name alone.
+C. Whether training completed without errors.
 
-D. Whether training completed without errors.
+D. Parameter count alone.
 
 <details>
 <summary>Show answer and explanation</summary>

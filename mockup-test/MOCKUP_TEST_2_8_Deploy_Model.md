@@ -6,18 +6,18 @@ Choose the single best answer for each question.
 
 What is a benefit of invoking a fully managed model API?
 
-A. It avoids initial infrastructure investment and simplifies operations.
+A. It gives complete control over the physical server.
 
-B. It always supports every custom fine-tuned model.
+B. It removes all API costs.
 
-C. It gives complete control over the physical server.
+C. It avoids initial infrastructure investment and simplifies operations.
 
-D. It removes all API costs.
+D. It always supports every custom fine-tuned model.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 Managed APIs suit early or small-to-medium scenarios where low setup and operations burden matter.
 
@@ -28,18 +28,18 @@ Managed APIs suit early or small-to-medium scenarios where low setup and operati
 
 Why does the lesson deploy a fine-tuned model with vLLM?
 
-A. vLLM simplifies serving and supports efficient inference and concurrent requests.
+A. It replaces the model weights with prompts.
 
-B. It creates training data automatically.
+B. It is a vector database.
 
-C. It is a vector database.
+C. It creates training data automatically.
 
-D. It replaces the model weights with prompts.
+D. vLLM simplifies serving and supports efficient inference and concurrent requests.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 The lesson describes vLLM as an inference framework with efficient serving and memory management.
 
@@ -50,18 +50,18 @@ The lesson describes vLLM as an inference framework with efficient serving and m
 
 What endpoint is used to test a locally served chat model in the example?
 
-A. `/v1/chat/completions`.
+A. `/api/key`.
 
-B. `/v1/embeddings/index`.
+B. `/v1/chat/completions`.
 
-C. `/api/key`.
+C. `/v1/embeddings/index`.
 
 D. `/v2/train`.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 The vLLM service is OpenAI API compatible and can be called at the chat completions endpoint.
 
@@ -74,11 +74,11 @@ The fine-tuned service runs on port 8001 while the base service uses 8000. What 
 
 A. Target port 8001 for the fine-tuned service.
 
-B. Change the model response role.
+B. Switch to the vector database port.
 
-C. Use both ports in one URL.
+C. Change the model response role.
 
-D. Switch to the vector database port.
+D. Use both ports in one URL.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -94,9 +94,9 @@ The notebook specifically instructs changing the request port to 8001 when testi
 
 In the lesson’s wrk experiment, what changes between the two test runs?
 
-A. Concurrency changes from 1 to 10 while duration remains 10 seconds.
+A. The model is retrained for each run.
 
-B. The model is retrained for each run.
+B. Concurrency changes from 1 to 10 while duration remains 10 seconds.
 
 C. The endpoint changes from chat to embeddings.
 
@@ -105,7 +105,7 @@ D. The test duration changes from 1 to 10 minutes.
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 The commands use concurrency levels 1 and 10 and a 10-second duration.
 
@@ -116,18 +116,18 @@ The commands use concurrency levels 1 and 10 and a 10-second duration.
 
 A team needs serverless GPU inference with fast automatic scaling and low infrastructure management. Which service is highlighted?
 
-A. Function Compute (FC).
+A. A local Jupyter notebook.
 
 B. A manually managed ECS instance only.
 
-C. A local Jupyter notebook.
+C. A vector database.
 
-D. A vector database.
+D. Function Compute (FC).
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 FC is described as serverless GPU service with automatic scaling and pay-as-you-go operation.
 
@@ -138,18 +138,18 @@ FC is described as serverless GPU service with automatic scaling and pay-as-you-
 
 A production workload needs real-time synchronous inference and model warm-up to reduce initial response delay. Which service fits the lesson’s description?
 
-A. PAI-EAS.
+A. Notebook autosave.
 
-B. Static object storage.
+B. PAI-EAS.
 
-C. A batch-only inference endpoint.
+C. Static object storage.
 
-D. Notebook autosave.
+D. A batch-only inference endpoint.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 PAI-EAS targets online synchronous inference and offers warm-up; it may have higher fixed costs.
 
@@ -162,11 +162,11 @@ When might ECS be preferred for model deployment?
 
 A. The team needs deep control over server configuration and can handle operations.
 
-B. The team wants no infrastructure management under any conditions.
+B. The model must run exclusively in a browser.
 
-C. The workload only requires a model API key.
+C. The team wants no infrastructure management under any conditions.
 
-D. The model must run exclusively in a browser.
+D. The workload only requires a model API key.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -184,9 +184,9 @@ A team already operates Kubernetes and wants GPU containers while offloading clu
 
 A. ACS.
 
-B. A raw local process.
+B. A model leaderboard.
 
-C. A model leaderboard.
+C. A raw local process.
 
 D. An embedding endpoint.
 
@@ -204,18 +204,18 @@ ACS lets GPU-powered containers run in a familiar Kubernetes environment while o
 
 How should a team choose among deployment services?
 
-A. Balance core requirements, model compatibility, and operational complexity with team capabilities.
+A. Optimize only for the lowest initial price.
 
-B. Choose whichever has the most features regardless of use case.
+B. Always use the same service for every model.
 
-C. Optimize only for the lowest initial price.
+C. Balance core requirements, model compatibility, and operational complexity with team capabilities.
 
-D. Always use the same service for every model.
+D. Choose whichever has the most features regardless of use case.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 The lesson’s decision recommendations consider requirements, compatibility, and operational capabilities.
 

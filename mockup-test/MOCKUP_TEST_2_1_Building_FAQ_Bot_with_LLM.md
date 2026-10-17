@@ -6,18 +6,18 @@ Choose the single best answer for each question.
 
 A developer wants to call Qwen from a Python application. Which approach does the lesson demonstrate?
 
-A. Use the OpenAI Python SDK with Model Studio’s compatible endpoint.
+A. Send requests directly to the notebook kernel.
 
-B. Use a browser automation script to copy answers from Qwen’s web UI.
+B. Use the OpenAI Python SDK with Model Studio’s compatible endpoint.
 
 C. Train a new model from scratch.
 
-D. Send requests directly to the notebook kernel.
+D. Use a browser automation script to copy answers from Qwen’s web UI.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 The lesson shows Qwen being called through the OpenAI-compatible Python SDK and a DashScope base URL.
 
@@ -30,9 +30,9 @@ Before using Qwen through the API, what must be done in Model Studio?
 
 A. Activate model invocation service and create an API key.
 
-B. Create a vector database and upload all documents.
+B. Deploy a GPU instance.
 
-C. Deploy a GPU instance.
+C. Create a vector database and upload all documents.
 
 D. Publish the application to a public endpoint.
 
@@ -52,11 +52,11 @@ Why does the lesson recommend putting the API key in an environment variable?
 
 A. It reduces accidental exposure in shared code and avoids updating hardcoded copies when rotating keys.
 
-B. It makes the model produce deterministic answers.
+B. It removes the need to authenticate API requests.
 
-C. It increases the context window.
+C. It makes the model produce deterministic answers.
 
-D. It removes the need to authenticate API requests.
+D. It increases the context window.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -72,18 +72,18 @@ Environment variables keep the secret out of source code and simplify key rotati
 
 In a chat completion message list, what do `role` and `content` represent?
 
-A. The speaker category and the message text.
+A. The prompt template and retrieved document.
 
 B. The model name and API endpoint.
 
-C. The token limit and temperature.
+C. The speaker category and the message text.
 
-D. The prompt template and retrieved document.
+D. The token limit and temperature.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 The lesson describes each message as having a role such as system/user/assistant and its content.
 
@@ -98,9 +98,9 @@ A. Pass prior user and assistant messages in the conversation history.
 
 B. Increase the API key length.
 
-C. Use streaming output.
+C. Change the system role after each turn.
 
-D. Change the system role after each turn.
+D. Use streaming output.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -116,18 +116,18 @@ Multi-turn coherence comes from retaining the conversation history in the messag
 
 A long conversation exceeds the practical context window. Which mitigation is suggested?
 
-A. Truncate or summarize older history.
+A. Switch every turn to streaming.
 
 B. Remove the system message and retain only the latest assistant answer.
 
-C. Switch every turn to streaming.
+C. Repeat the entire history in the user’s final question.
 
-D. Repeat the entire history in the user’s final question.
+D. Truncate or summarize older history.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 The lesson notes that history consumes context and may need truncation or summarization.
 
@@ -138,18 +138,18 @@ The lesson notes that history consumes context and may need truncation or summar
 
 What does `stream=True` change in the demonstrated API call?
 
-A. How generated content is delivered and displayed over time.
+A. The API key’s permissions.
 
-B. The model’s underlying reasoning and final answer quality.
+B. How generated content is delivered and displayed over time.
 
-C. The API key’s permissions.
+C. Which messages are included in the prompt.
 
-D. Which messages are included in the prompt.
+D. The model’s underlying reasoning and final answer quality.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Streaming shows pieces of the response as they are generated; the lesson says it does not change reasoning or final quality.
 
@@ -160,18 +160,18 @@ Streaming shows pieces of the response as they are generated; the lesson says it
 
 Why can identical prompts produce slightly different answers?
 
-A. Sampling-based decoding can choose different tokens from a probability distribution.
+A. The model always uses a different knowledge base.
 
 B. Tokenization randomly changes the prompt each time.
 
 C. The API drops the system message on alternating calls.
 
-D. The model always uses a different knowledge base.
+D. Sampling-based decoding can choose different tokens from a probability distribution.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 The lesson explains that stochastic sampling can produce variation for the same input.
 
@@ -182,18 +182,18 @@ The lesson explains that stochastic sampling can produce variation for the same 
 
 What is the purpose of tokenization?
 
-A. Convert input text into token units associated with vocabulary IDs.
+A. Store document vectors for retrieval.
 
 B. Turn token IDs into semantically rich vectors.
 
-C. Store document vectors for retrieval.
+C. Convert input text into token units associated with vocabulary IDs.
 
 D. Choose the final output sentence.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 Tokenization breaks text into tokens and maps them to integer IDs; vectorization is a later step.
 
@@ -204,18 +204,18 @@ Tokenization breaks text into tokens and maps them to integer IDs; vectorization
 
 A team wants more predictable output from sampling. Which parameter direction does the lesson associate with greater determinism?
 
-A. Lower temperature, which concentrates probability on fewer high-probability tokens.
+A. Higher top-p, which disables sampling entirely.
 
-B. Higher temperature, which flattens the distribution.
+B. Lower temperature, which concentrates probability on fewer high-probability tokens.
 
-C. Higher top-p, which disables sampling entirely.
+C. Higher temperature, which flattens the distribution.
 
 D. More conversation history, which guarantees identical output.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Lower temperature sharpens the distribution and makes output more deterministic according to the lesson.
 

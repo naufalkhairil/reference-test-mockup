@@ -6,18 +6,18 @@ Choose the single best answer for each question.
 
 What distinguishes an LLM agent from a chatbot that only returns text?
 
-A. An agent can select and use tools to take actions toward a goal.
+A. An agent only retrieves static documents.
 
-B. An agent must always have a larger context window.
+B. An agent can select and use tools to take actions toward a goal.
 
 C. A chatbot has no system prompt.
 
-D. An agent only retrieves static documents.
+D. An agent must always have a larger context window.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 The lesson frames agents around planning and executing tasks using tools.
 
@@ -28,18 +28,18 @@ The lesson frames agents around planning and executing tasks using tools.
 
 A user asks an agent to schedule a meeting and send invitations. What enables those actions?
 
-A. Tools or function interfaces that connect the model to calendar and email operations.
+A. A larger temperature value.
 
-B. A larger temperature value.
+B. A local vector index.
 
 C. A longer system prompt alone.
 
-D. A local vector index.
+D. Tools or function interfaces that connect the model to calendar and email operations.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 The model needs tool integrations to perform external operations.
 
@@ -50,18 +50,18 @@ The model needs tool integrations to perform external operations.
 
 Why should an agent inspect tool definitions and parameters carefully?
 
-A. The model needs clear descriptions and schemas to choose tools and provide valid arguments.
+A. Parameters make retrieval unnecessary.
 
-B. Tool descriptions determine the API key.
+B. The schema trains the model weights.
 
-C. The schema trains the model weights.
+C. The model needs clear descriptions and schemas to choose tools and provide valid arguments.
 
-D. Parameters make retrieval unnecessary.
+D. Tool descriptions determine the API key.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 Tool names, descriptions, and argument schemas guide tool selection and invocation.
 
@@ -94,18 +94,18 @@ Agent execution commonly cycles through planning, action, and observation until 
 
 A tool returns an error. What should a robust agent do next?
 
-A. Use the observation to revise its plan or report the failure clearly.
+A. Pretend the tool succeeded.
 
-B. Pretend the tool succeeded.
+B. Ignore the result and fabricate output.
 
-C. Ignore the result and fabricate output.
+C. Call unrelated tools indefinitely.
 
-D. Call unrelated tools indefinitely.
+D. Use the observation to revise its plan or report the failure clearly.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 Tool outputs are observations that should inform subsequent decisions and honest reporting.
 
@@ -118,11 +118,11 @@ Why should tool access follow least privilege?
 
 A. It limits the impact if the agent makes an unsafe or mistaken tool call.
 
-B. It improves tokenization accuracy.
+B. It removes the need for user confirmation in every application.
 
-C. It guarantees the agent never hallucinates.
+C. It improves tokenization accuracy.
 
-D. It removes the need for user confirmation in every application.
+D. It guarantees the agent never hallucinates.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -142,9 +142,9 @@ A. A tool that updates employee records or sends an external email.
 
 B. A tool that formats a string locally.
 
-C. A read-only text summarizer.
+C. A prompt that selects a tone.
 
-D. A prompt that selects a tone.
+D. A read-only text summarizer.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -160,18 +160,18 @@ Side-effecting actions need authorization and safeguards because they change dat
 
 An agent produces repetitive tool calls without progress. What design element helps prevent runaway execution?
 
-A. A bounded iteration or step limit with a clear stop condition.
+A. More retrieved chunks.
 
-B. An unlimited context window.
+B. A bounded iteration or step limit with a clear stop condition.
 
 C. A second API key.
 
-D. More retrieved chunks.
+D. An unlimited context window.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 A bounded loop and stop criteria control execution and resource use.
 
@@ -182,18 +182,18 @@ A bounded loop and stop criteria control execution and resource use.
 
 Why is explicit structured tool output useful?
 
-A. It helps the agent interpret results consistently and decide the next step.
+A. It ensures all tools return the same answer.
 
-B. It ensures all tools return the same answer.
+B. It makes actions irreversible.
 
-C. It replaces access controls.
+C. It helps the agent interpret results consistently and decide the next step.
 
-D. It makes actions irreversible.
+D. It replaces access controls.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 Consistent results make the observe-and-decide loop easier to manage.
 
@@ -204,9 +204,9 @@ Consistent results make the observe-and-decide loop easier to manage.
 
 When should an agent finish and respond to the user?
 
-A. When the goal is achieved, a defined stop condition is reached, or it cannot proceed and should explain why.
+A. Only after it has called every tool.
 
-B. Only after it has called every tool.
+B. When the goal is achieved, a defined stop condition is reached, or it cannot proceed and should explain why.
 
 C. As soon as it makes the first plan.
 
@@ -215,7 +215,7 @@ D. Never; agents should keep reasoning indefinitely.
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Agents need explicit completion and failure conditions to avoid unnecessary actions.
 

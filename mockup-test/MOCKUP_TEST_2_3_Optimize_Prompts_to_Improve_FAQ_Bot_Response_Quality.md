@@ -8,9 +8,9 @@ A bot answers correctly but users want direct links for relevant tools. Why is a
 
 A. It applies an irrelevant instruction to unrelated questions and can make answers awkward.
 
-B. It prevents retrieval from running.
+B. It changes the model’s training data.
 
-C. It changes the model’s training data.
+C. It prevents retrieval from running.
 
 D. It disables system prompts.
 
@@ -28,18 +28,18 @@ The lesson points out that one-size-fits-all appended instructions can be irrele
 
 Which set best represents the basic elements of a useful prompt described in the lesson?
 
-A. Task objective, context, and background information.
+A. Temperature, GPU count, and deployment region.
 
-B. API key, endpoint, and Python version.
+B. Task objective, context, and background information.
 
-C. Chunk size, vector dimension, and database name.
+C. API key, endpoint, and Python version.
 
-D. Temperature, GPU count, and deployment region.
+D. Chunk size, vector dimension, and database name.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 The lesson emphasizes clearly stating the task, context, and background.
 
@@ -50,18 +50,18 @@ The lesson emphasizes clearly stating the task, context, and background.
 
 Why use delimiters around supplied text?
 
-A. They separate the content to process from the instructions and reduce ambiguity.
+A. They replace the need to state the task.
 
 B. They force the model to use a particular vector database.
 
-C. They guarantee a correct factual answer.
+C. They separate the content to process from the instructions and reduce ambiguity.
 
-D. They replace the need to state the task.
+D. They guarantee a correct factual answer.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 Delimiters make prompt structure clearer and help focus the model on the intended content.
 
@@ -74,11 +74,11 @@ A response should be written for newly hired employees in a welcoming tone. Whic
 
 A. Audience.
 
-B. Temperature.
+B. Embedding.
 
-C. Embedding.
+C. Retrieval threshold.
 
-D. Retrieval threshold.
+D. Temperature.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -94,18 +94,18 @@ The audience specifies who the output is for; role defines the identity the mode
 
 A downstream service must parse the model response. What should the developer specify?
 
-A. A structured output format such as JSON, with clear content requirements.
+A. Only the intended audience.
 
-B. A longer natural-language answer with no schema.
+B. A few-shot example without format requirements.
 
-C. Only the intended audience.
+C. A structured output format such as JSON, with clear content requirements.
 
-D. A few-shot example without format requirements.
+D. A longer natural-language answer with no schema.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 The lesson recommends explicit structured formats for programmatic use.
 
@@ -116,18 +116,18 @@ The lesson recommends explicit structured formats for programmatic use.
 
 The model returns valid JSON but inconsistent style and structure. What prompting technique can help?
 
-A. Provide few-shot examples that demonstrate the desired pattern.
+A. Use streaming output.
 
-B. Increase the maximum token limit.
+B. Provide few-shot examples that demonstrate the desired pattern.
 
-C. Remove all context.
+C. Increase the maximum token limit.
 
-D. Use streaming output.
+D. Remove all context.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Examples communicate the target format and style, beyond a format label alone.
 
@@ -138,18 +138,18 @@ Examples communicate the target format and style, beyond a format label alone.
 
 A general-purpose model struggles with a multi-step math task. What technique does the lesson describe for eliciting more deliberate reasoning?
 
-A. Chain-of-thought prompting that asks for step-by-step reasoning.
+A. Removing all task context.
 
-B. Removing all task context.
+B. Chain-of-thought prompting that asks for step-by-step reasoning.
 
-C. Using only a role name.
+C. Switching to exact-match retrieval.
 
-D. Switching to exact-match retrieval.
+D. Using only a role name.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 For general-purpose models, the lesson presents CoT as a way to guide complex reasoning tasks.
 
@@ -160,18 +160,18 @@ For general-purpose models, the lesson presents CoT as a way to guide complex re
 
 A prompt writer wants the model to help improve a weak prompt. What is meta prompting?
 
-A. Have the model analyze the prompt and suggest or produce an improved prompt.
+A. Ask users to rewrite every question.
 
 B. Use a second vector database to rerank answers.
 
-C. Ask users to rewrite every question.
+C. Set temperature to zero and stop iterating.
 
-D. Set temperature to zero and stop iterating.
+D. Have the model analyze the prompt and suggest or produce an improved prompt.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 Meta prompting uses the model as a prompt coach to analyze and optimize prompts.
 
@@ -182,18 +182,18 @@ Meta prompting uses the model as a prompt coach to analyze and optimize prompts.
 
 Why use a reference answer in a multi-round prompt optimization loop?
 
-A. It gives the evaluator a target for identifying specific gaps in the generated answer.
+A. It ensures every prompt has identical wording.
 
-B. It replaces the generation model.
+B. It eliminates the need for evaluation data.
 
-C. It ensures every prompt has identical wording.
+C. It replaces the generation model.
 
-D. It eliminates the need for evaluation data.
+D. It gives the evaluator a target for identifying specific gaps in the generated answer.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 A reference answer enables concrete gap analysis before the optimizer revises the prompt.
 
@@ -206,11 +206,11 @@ Why should an AI Judge be evaluated on a separate evaluation set while its promp
 
 A. To detect overfitting to the examples used to develop the judge.
 
-B. To increase the model context window.
+B. To prevent the judge from returning structured output.
 
-C. To ensure all answers have the same length.
+C. To increase the model context window.
 
-D. To prevent the judge from returning structured output.
+D. To ensure all answers have the same length.
 
 <details>
 <summary>Show answer and explanation</summary>

@@ -8,11 +8,11 @@ What is the first step in the lesson’s production planning approach?
 
 A. Understand the business context and define requirements.
 
-B. Select a GPU before identifying the task.
+B. Start by maximizing output tokens.
 
 C. Choose a benchmark unrelated to the application.
 
-D. Start by maximizing output tokens.
+D. Select a GPU before identifying the task.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -28,18 +28,18 @@ Production planning begins with business context, followed by functional and non
 
 Which statement distinguishes functional from non-functional requirements?
 
-A. Functional requirements define what the model does; non-functional requirements describe how well it performs.
+A. Non-functional requirements define the model’s task.
 
 B. Functional requirements describe latency only.
 
-C. Non-functional requirements define the model’s task.
+C. They are interchangeable terms.
 
-D. They are interchangeable terms.
+D. Functional requirements define what the model does; non-functional requirements describe how well it performs.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 The lesson explicitly contrasts task capabilities with quality and operational characteristics.
 
@@ -50,18 +50,18 @@ The lesson explicitly contrasts task capabilities with quality and operational c
 
 A product must classify images. What model-selection guidance does the lesson give?
 
-A. Use a dedicated vision model for vision tasks.
+A. Fine-tune a speech model.
 
-B. Use any text-only general LLM by default.
+B. Use a dedicated vision model for vision tasks.
 
-C. Chain unrelated models for every image.
+C. Use any text-only general LLM by default.
 
-D. Fine-tune a speech model.
+D. Chain unrelated models for every image.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 The lesson says vision tasks typically need dedicated vision models rather than general LLMs.
 
@@ -72,18 +72,18 @@ The lesson says vision tasks typically need dedicated vision models rather than 
 
 A team wants faster inference for a simple use case. Which option is consistent with the lesson?
 
-A. Choose a smaller model or use compression methods such as quantization.
+A. Always run on CPUs instead of GPUs.
 
-B. Increase the model size.
+B. Choose a smaller model or use compression methods such as quantization.
 
-C. Add more irrelevant context.
+C. Increase the model size.
 
-D. Always run on CPUs instead of GPUs.
+D. Add more irrelevant context.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Smaller models and compression can reduce inference requirements.
 
@@ -94,18 +94,18 @@ Smaller models and compression can reduce inference requirements.
 
 Which description of context caching is correct?
 
-A. Reuse computation for common input prefixes across requests.
+A. Cache final outputs regardless of the question.
 
-B. Cache final outputs regardless of the question.
+B. Replace the need for conversation context.
 
-C. Store only model weights in a vector database.
+C. Reuse computation for common input prefixes across requests.
 
-D. Replace the need for conversation context.
+D. Store only model weights in a vector database.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 Context Cache reduces redundant computation when requests share prefix content.
 
@@ -116,18 +116,18 @@ Context Cache reduces redundant computation when requests share prefix content.
 
 Why is prompt guidance often preferable to a strict `max_tokens` cap for concise but complete messages?
 
-A. The model can adapt its response while preserving meaning; a hard cap may cut it off mid-sentence.
+A. `max_tokens` increases answer accuracy.
 
 B. Prompt guidance always costs zero tokens.
 
-C. `max_tokens` increases answer accuracy.
+C. A hard cap guarantees a complete sentence.
 
-D. A hard cap guarantees a complete sentence.
+D. The model can adapt its response while preserving meaning; a hard cap may cut it off mid-sentence.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 The lesson presents prompt constraints as the first choice for semantic completeness and max_tokens as a safety limit.
 
@@ -162,11 +162,11 @@ A task is simple and rules-based. Should an application automatically use an LLM
 
 A. No; the lesson recommends considering simpler classical methods when they are faster and less complex.
 
-B. Yes; every task benefits from generation.
+B. Only after converting rules into images.
 
-C. Only if the model has a larger context window.
+C. Yes; every task benefits from generation.
 
-D. Only after converting rules into images.
+D. Only if the model has a larger context window.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -182,18 +182,18 @@ The lesson warns against defaulting to LLMs when simpler methods fit better.
 
 The backend takes several seconds to respond. Which design can reduce perceived waiting time?
 
-A. Stream partial output and show task progress.
+A. Remove error messages.
 
-B. Hide all status until completion.
+B. Increase the output length.
 
-C. Increase the output length.
+C. Stream partial output and show task progress.
 
-D. Remove error messages.
+D. Hide all status until completion.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 Streaming and visible progress improve perceived responsiveness even when backend time remains.
 
@@ -204,9 +204,9 @@ Streaming and visible progress improve perceived responsiveness even when backen
 
 Traffic varies widely across the day. What stability measure does the lesson recommend?
 
-A. Automated scaling based on traffic, with monitoring and alerts.
+A. Provision for peak traffic permanently without monitoring.
 
-B. Provision for peak traffic permanently without monitoring.
+B. Automated scaling based on traffic, with monitoring and alerts.
 
 C. Disable all error reporting.
 
@@ -215,7 +215,7 @@ D. Use a fixed number of instances regardless of demand.
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Autoscaling helps meet demand without overprovisioning, while monitoring detects anomalies.
 

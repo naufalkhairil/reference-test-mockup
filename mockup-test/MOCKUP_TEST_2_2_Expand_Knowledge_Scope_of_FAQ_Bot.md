@@ -6,18 +6,18 @@ Choose the single best answer for each question.
 
 A model lacks a company’s internal policy because it was not in its training data. How does RAG address this?
 
-A. Retrieve relevant reference material and provide it to the model with the question.
+A. Fine-tune on every question at runtime.
 
-B. Fine-tune on every question at runtime.
+B. Retrieve relevant reference material and provide it to the model with the question.
 
-C. Replace the model with a keyword matcher.
+C. Ask users to include the entire policy manually.
 
-D. Ask users to include the entire policy manually.
+D. Replace the model with a keyword matcher.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 RAG supplies external context so the model can answer like an open-book exam.
 
@@ -28,18 +28,18 @@ RAG supplies external context so the model can answer like an open-book exam.
 
 Which sequence matches the lesson’s indexing workflow?
 
-A. Parse documents, chunk text, embed chunks, store vectors.
+A. Chunk, generate, tokenize, deploy.
 
-B. Retrieve, generate, parse, fine-tune.
+B. Parse documents, chunk text, embed chunks, store vectors.
 
-C. Chunk, generate, tokenize, deploy.
+C. Store vectors, parse documents, generate, rerank.
 
-D. Store vectors, parse documents, generate, rerank.
+D. Retrieve, generate, parse, fine-tune.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Indexing prepares searchable material through parsing, chunking, embedding, and vector storage.
 
@@ -72,18 +72,18 @@ The lesson describes chunking as segmenting parsed documents into smaller pieces
 
 What is the role of an embedding model in RAG indexing?
 
-A. Convert text chunks into numerical vectors that capture semantic meaning.
+A. Generate the final answer directly.
 
-B. Generate the final answer directly.
+B. Convert text chunks into numerical vectors that capture semantic meaning.
 
-C. Split API credentials into safe parts.
+C. Store the full conversation history.
 
-D. Store the full conversation history.
+D. Split API credentials into safe parts.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: B**
 
 Embeddings support semantic comparison by representing the text as vectors.
 
@@ -94,18 +94,18 @@ Embeddings support semantic comparison by representing the text as vectors.
 
 How does retrieval find candidate context for a user question?
 
-A. Embed the question with the same embedding model and compare it with stored chunk vectors.
+A. Compare the question to model weights.
 
-B. Search only for exact character matches in the original files.
+B. Ask the LLM to invent likely policy text.
 
-C. Ask the LLM to invent likely policy text.
+C. Embed the question with the same embedding model and compare it with stored chunk vectors.
 
-D. Compare the question to model weights.
+D. Search only for exact character matches in the original files.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 The question vector is compared against stored chunk vectors to find the most similar material.
 
@@ -116,18 +116,18 @@ The question vector is compared against stored chunk vectors to find the most si
 
 Why does the lesson call retrieval critical to RAG accuracy?
 
-A. If the system finds the wrong material, the generated answer is likely to be inaccurate.
+A. Retrieval determines the API key permissions.
 
-B. Retrieval determines the API key permissions.
+B. The embedding model writes company policy.
 
 C. Generation cannot use more than one text chunk.
 
-D. The embedding model writes company policy.
+D. If the system finds the wrong material, the generated answer is likely to be inaccurate.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 The quality of the answer depends on retrieving relevant evidence.
 
@@ -140,11 +140,11 @@ What happens during the generation stage?
 
 A. A prompt combines the question with retrieved text, and the LLM produces a response using that context.
 
-B. The vector database retrains the LLM.
+B. The user question is discarded after retrieval.
 
 C. The system converts the answer into document chunks.
 
-D. The user question is discarded after retrieval.
+D. The vector database retrains the LLM.
 
 <details>
 <summary>Show answer and explanation</summary>
@@ -160,18 +160,18 @@ Generation assembles retrieved segments and the query in a prompt template for t
 
 A team wants to avoid rebuilding a time-consuming index each time it restarts its application. What should it do?
 
-A. Save the index locally and reload it when needed.
+A. Repeat parsing and embedding on every question.
 
-B. Repeat parsing and embedding on every question.
+B. Cache only the model answer, not the index.
 
-C. Cache only the model answer, not the index.
+C. Save the index locally and reload it when needed.
 
 D. Increase the number of prompt examples.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: C**
 
 The lesson recommends saving and loading an index to avoid repeated construction.
 
@@ -182,18 +182,18 @@ The lesson recommends saving and loading an index to avoid repeated construction
 
 In multi-turn RAG, why is conversation history not simply the entire solution?
 
-A. The current question still needs to be resolved against relevant knowledge during retrieval.
+A. Conversation history replaces the vector index.
 
 B. History is never passed to an LLM.
 
 C. RAG cannot answer follow-up questions.
 
-D. Conversation history replaces the vector index.
+D. The current question still needs to be resolved against relevant knowledge during retrieval.
 
 <details>
 <summary>Show answer and explanation</summary>
 
-**Answer: A**
+**Answer: D**
 
 RAG adds retrieval to multi-turn interaction; history helps resolve context, while retrieval supplies knowledge.
 
@@ -206,9 +206,9 @@ Which library does the lesson use to build a RAG application with less implement
 
 A. LlamaIndex.
 
-B. vLLM.
+B. wrk.
 
-C. wrk.
+C. vLLM.
 
 D. OpenCV.
 
