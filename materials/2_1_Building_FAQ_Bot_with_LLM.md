@@ -18,24 +18,20 @@ To experience the tutorial smoothly, we recommend first completing the [**Enviro
 ### 1.1 Confirm the Python environment
 The most direct way to experience an LLM is to chat with it through a web interface (such as [Qwen](https://tongyi.aliyun.com/qianwen/)). But as a developer, you often need to integrate LLM capabilities into your own application; you can use the widely-adopted OpenAI Python SDK to call the Qwen LLM. You already installed the necessary dependencies in `1.0 Compute Environment Setup`. Before running the code below, make sure you've switched to the newly created Python environment — in this example, `Python (llm_learn)`.
 
-<a href="https://img.alicdn.com/imgextra/i4/O1CN01nf2EYI1pwhhMbOWHe_!!6000000005425-0-tps-2258-1004.jpg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01nf2EYI1pwhhMbOWHe_!!6000000005425-0-tps-2258-1004.jpg" width="600">
-</a>
+*(Screenshot: DSW notebook interface showing where to switch the Python kernel to the `Python (llm_learn)` environment.)*
 
-<a href="https://img.alicdn.com/imgextra/i3/O1CN01rn0jvB1Z1QJXUWaG2_!!6000000003134-0-tps-3138-914.jpg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01rn0jvB1Z1QJXUWaG2_!!6000000003134-0-tps-3138-914.jpg" width="600">
-</a>
+*(Screenshot: confirming the notebook kernel is switched to the `Python (llm_learn)` environment in DSW.)*
 
 ### 1.2 Get an API Key
 To call Qwen, go to Alibaba Cloud's LLM service platform Model Studio (Bailian), activate the [model invocation service](https://bailian.console.aliyun.com/#/model-market) and [create an API Key](https://bailian.console.aliyun.com/?apiKey=1#/api-key).
 
 > If the top of the page shows the following, you haven't yet activated Model Studio's model invocation service. After activating, you can call models.
-> <img src="https://help-static-aliyun-doc.aliyuncs.com/assets/img/zh-CN/5298748271/p856749.png" width="600">
+> *(Screenshot: Alibaba Cloud Model Studio page for activating the model invocation service.)*
 
 > Follow the steps in the image below to get your API KEY:
 >
 > <a href="https://img.alicdn.com/imgextra/i3/O1CN01hdY7Ln1Xm1QHVrfTA_!!6000000002965-2-tps-3428-1868.png" target="_blank">
-> <img src="https://img.alicdn.com/imgextra/i3/O1CN01hdY7Ln1Xm1QHVrfTA_!!6000000002965-2-tps-3428-1868.png" width="600">
+> *(Screenshot: step-by-step walkthrough in Model Studio to obtain your API key.)*
 > </a>
 
 ### 1.3 Configure the API Key
@@ -179,9 +175,7 @@ These two phenomena are actually quite interesting! Why does the LLM behave this
 ## 📚 2. How LLMs Work
 Over recent decades, AI has undergone a profound evolution from basic algorithms to generative AI. By learning from vast amounts of data, generative AI can create brand-new content such as text, images, audio, and video, greatly advancing the widespread application of AI. Common use cases include intelligent Q&A (such as Qwen, GPT), creative image generation (such as Stable Diffusion), and code generation (such as Lingma) — spanning many fields and putting AI within reach.
 
-<a href="https://img.alicdn.com/imgextra/i3/O1CN01XhNFzh1bj3EybLhgk_!!6000000003500-0-tps-2090-1138.jpg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01XhNFzh1bj3EybLhgk_!!6000000003500-0-tps-2090-1138.jpg" width="600">
-</a>
+*(Figure: example generative-AI applications — intelligent Q&A (Qwen, GPT), image generation (Stable Diffusion), and code generation (Lingma).)*
 
 As one of the most classic and widespread LLM applications, intelligent Q&A is the best example for exploring how LLMs work. Next, we'll introduce the LLM's workflow in a Q&A scenario to help you more deeply understand the underlying technical principles.
 
@@ -189,15 +183,21 @@ As one of the most classic and widespread LLM applications, intelligent Q&A is t
 
 Let's take a simple input "ACP is a very" and look concretely at how the LLM processes this input step by step and eventually generates a complete sentence.
 
-<a href="https://img.alicdn.com/imgextra/i2/O1CN01Qrc5aI1eG9CAeA4Wt_!!6000000003843-2-tps-1656-392.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01Qrc5aI1eG9CAeA4Wt_!!6000000003843-2-tps-1656-392.png" width="700">
-</a>
+*Figure (translated): the LLM text-generation workflow, split into five stages.*
+
+```mermaid
+flowchart LR
+    A["Input: 'ACP is a very'"] --> B["1. Tokenization<br/>text → token IDs"]
+    B --> C["2. Token vectorization<br/>token IDs → vectors"]
+    C --> D["3. LLM inference<br/>vectors → next-token logits"]
+    D --> E["4. Decoding & autoregression<br/>pick next token, append to input, repeat"]
+    E --> F["5. Output text"]
+    F -.->|"until end-of-sequence"| D
+```
 
 The LLM's text-generation workflow can be divided into five stages: tokenization, token vectorization, LLM inference, decoding & autoregression, and output text:
 
-<a href="https://img.alicdn.com/imgextra/i3/O1CN019yT13b27ZxBFFG3cm_!!6000000007812-2-tps-5504-3072.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN019yT13b27ZxBFFG3cm_!!6000000007812-2-tps-5504-3072.png" width="900">
-</a>
+*(Screenshot: "ACP is a very" split into tokens (sub-word fragments such as the root and suffix of a word), each mapped to an integer ID from the vocabulary.)*
 
 **Stage 1: Tokenization**
 
@@ -207,9 +207,7 @@ A token is the basic unit the tokenizer produces after encoding text; each token
 
 Taking "ACP is a very" as an example, the tokenizer encodes it into several tokens and assigns each an ID. If you're interested in Qwen's tokenization details, see its official docs: [Tokenization notes](https://github.com/QwenLM/Qwen/blob/main/tokenization_note_zh.md).
 
-<a href="https://gw.alicdn.com/imgextra/i1/O1CN019gAS3k1DrhwpIdHl6_!!6000000000270-0-tps-2414-546.jpg" target="_blank">
-<img src="https://gw.alicdn.com/imgextra/i1/O1CN019gAS3k1DrhwpIdHl6_!!6000000000270-0-tps-2414-546.jpg" width="900">
-</a>
+*(Figure: each token ID is looked up in an embedding table and converted into a high-dimensional vector that captures the token's meaning.)*
 
 **Stage 2: Token vectorization**
 
@@ -238,9 +236,14 @@ By adjusting **temperature**, you change the "sharpness" of the softmax output d
 
 For example, the figure below shows some candidate tokens the model predicts and their probabilities (the actual vocabulary is far larger):
 
-<a href="https://img.alicdn.com/imgextra/i3/O1CN01N93ZE81e6zAZA4TiK_!!6000000003823-0-tps-582-340.jpg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01N93ZE81e6zAZA4TiK_!!6000000003823-0-tps-582-340.jpg" width="180">
-</a>
+*Figure (translated): autoregressive decoding — each newly generated token is appended to the input and fed back in.*
+
+```mermaid
+flowchart LR
+    In["Input: ACP is a very"] --> M["LLM"]
+    M --> Out["Next token: informative"]
+    Out -->|"append to input"| In
+```
 
 Once the next token is chosen (say the model picks "informative"), this newly generated token is appended to the end of the original input sequence, forming the new input "ACP is a very informative." Then, based on this new sequence, the model repeats stages 3 and 4 to continue predicting the next token. This "word-chain" process is called **autoregressive generation**.
 
@@ -283,9 +286,7 @@ Before the LLM generates the next token (next-token), it first computes an initi
 
 For a more intuitive understanding, the figure below shows how different temperature values affect the candidate token distribution. The plotting code is under the /resources/2_1 directory.
 
-<a href="https://img.alicdn.com/imgextra/i4/O1CN0137QeqL1o3uhFmaXHU_!!6000000005170-0-tps-3538-1242.jpg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i4/O1CN0137QeqL1o3uhFmaXHU_!!6000000005170-0-tps-3538-1242.jpg" width="1000">
-</a>
+*(Figure: responses at low / medium / high temperature (Qwen-Max range [0, 2)) — lower temperature gives focused, deterministic output; higher temperature gives more diverse, creative output.)*
 
 The low/medium/high temperatures in the figure are divided based on Qwen-Max's range [0, 2).
 
@@ -349,9 +350,7 @@ top_p is a filtering mechanism that selects a "small set" meeting a specific con
 
 The figure below shows how different top_p values affect sampling of the candidate token set.
 
-<a href="https://img.alicdn.com/imgextra/i4/O1CN01tL546W1x4DYoeKICj_!!6000000006389-0-tps-2732-1282.jpg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01tL546W1x4DYoeKICj_!!6000000006389-0-tps-2732-1282.jpg" width="700">
-</a>
+*(Figure: candidate tokens sorted by probability in descending order — the blue bars are the tokens whose cumulative probability reaches the `top_p` threshold (e.g., 0.5); only these are considered for sampling.)*
 
 In the figure, the blue part represents tokens whose cumulative probability reaches the top_p threshold (e.g. 0.5 or 0.8) — they form the new candidate set; the gray part is the tokens not selected.
 
@@ -447,7 +446,14 @@ However, when you try to "feed" more company documents this way (e.g. a dozens-o
   <p>This raises a core question: you need to <b>select and manage</b> what goes into the context window.</p>
 </td>
 <td style="width: 30%; border: none;">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN01EzBbZb1hYsCMyXCWi_!!6000000004290-2-tps-1536-1024.png">
+  *Figure (translated): the RAG indexing pipeline.*
+
+```mermaid
+flowchart LR
+    Docs["Documents"] --> Chunk["Chunking (split into segments)"]
+    Chunk --> Embed["Embedding model (text → vectors)"]
+    Embed --> Store[("Vector database")]
+```
 </td>
 </tr>
 </table>
@@ -485,7 +491,16 @@ So what techniques does context engineering include? You can quickly get the cor
   </td>
 
   <td style="width: 30%; vertical-align: top; border: none;">
-    <img src="https://img.alicdn.com/imgextra/i3/O1CN01fwRWvW1Rn2b9NdQTW_!!6000000002155-2-tps-1024-1024.png" alt="Context Engineering Diagram" style="width: 100%; max-width: 400px;">
+    *Figure (translated): the RAG retrieval-and-generation pipeline.*
+
+```mermaid
+flowchart LR
+    Q["User question"] --> E["Embedding model"]
+    E --> S["Similarity search in vector DB"]
+    S --> K["Top-k relevant chunks"]
+    K --> P["Prompt template: question + chunks"]
+    P --> M["LLM generates the answer"]
+```
   </td>
 </tr>
 </table>
@@ -507,14 +522,14 @@ When the user asks, instead of forcing the entire knowledge base onto the LLM, y
 Building a RAG application usually has two phases.
 
 #### 3.4.1 Phase 1: Indexing
-<img src="https://gw.alicdn.com/imgextra/i2/O1CN010zLf411zVoZQ9cWsI_!!6000000006720-2-tps-1592-503.png" width="600">
+*(Figure: the context window holds a limited number of tokens — you must deliberately select and manage what goes into it.)*
 
 Indexing converts private-knowledge documents or fragments into a form that can be retrieved efficiently. By splitting file content and converting it into multi-dimensional vectors (using a dedicated Embedding model), and combining with a vector store to preserve the text's semantic information, similarity computation becomes convenient. Vectorization lets the model efficiently retrieve and match relevant content — especially when handling large-scale knowledge bases, significantly improving query accuracy and response speed.
 
 After being processed by the Embedding model, these vectors not only capture the text's semantic information well, but — because the semantics are vectorized and standardized — make it easy to later compute relevance against the query's semantic vector.
 
 #### 3.4.2 Phase 2: Retrieval and generation
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01vbkBXC1HQ0SBrC1Ii_!!6000000000751-2-tps-1776-639.png" width="600">
+*(Figure: Context Engineering overview — systematically selecting and structuring what enters the context window, covering context window management, RAG, multi-turn conversation, and related techniques.)*
 
 Retrieval and generation: based on the user's question, retrieve relevant document fragments from the index; these fragments are fed into the LLM together with the question to generate the final answer. This way the LLM can answer private-knowledge questions.
 

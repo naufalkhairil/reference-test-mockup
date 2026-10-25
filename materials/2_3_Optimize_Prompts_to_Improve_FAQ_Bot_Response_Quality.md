@@ -840,9 +840,15 @@ The automated optimization loop in the previous section is very powerful, but it
 The key issue is that relying on vague evaluations like "is the gap big or small" is unreliable. You need an "**AI Judge**" that can give a clear "**✅ Pass**" or "**❌ Fail**" conclusion based on preset quantified standards for each optimization result, thereby providing a clear and reliable stopping condition for your automated workflow.
 
 <div align="center">
-  <a href="https://img.alicdn.com/imgextra/i4/O1CN01Ie6KDU1pMWUJ2Ky25_!!6000000005346-2-tps-1115-614.png" target="_blank">
-      <img src="https://img.alicdn.com/imgextra/i4/O1CN01Ie6KDU1pMWUJ2Ky25_!!6000000005346-2-tps-1115-614.png" width="900">
-    </a>
+  *Figure (translated): constructing an "AI Judge" via meta-prompting — the judge compares the bot's answer with the standard answer and produces a gap analysis.*
+
+```mermaid
+flowchart LR
+    QA["Q&A bot answer"] --> J["AI Judge (LLM driven by a meta-prompt)"]
+    GT["Standard answer"] --> J
+    J --> R["Gap analysis + improvement suggestions"]
+    R --> QA
+```
   <p>Figure: Constructing an "AI Judge" via Meta-Prompting to replace the <code>analyze_gap()</code> method and enhance judgment accuracy.</p>
 </div>
 
@@ -874,9 +880,7 @@ Finally, you decide when to stop "training" and adopt the version of the prompt 
 
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i1/O1CN01gJT1AY22xhe34lZwM_!!6000000007187-2-tps-1864-598.png" target="_blank">
-    <img src="https://img.alicdn.com/imgextra/i1/O1CN01gJT1AY22xhe34lZwM_!!6000000007187-2-tps-1864-598.png" width="800"/>
-    </a>
+    *(Figure: iterative optimization loop for the AI Judge — repeatedly update the judge using new training cases, and stop iterating based on training vs. evaluation performance.)*
   <p>Figure: Iterating the AI Judge via ML training; stop based on train vs. eval performance.</p>
 </div>
 

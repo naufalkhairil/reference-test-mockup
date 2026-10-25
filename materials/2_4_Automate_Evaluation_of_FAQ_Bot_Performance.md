@@ -64,9 +64,7 @@ And received the following answer from the bot:
 
 The original document contains multiple individuals named Michael Johnson, none of whom are associated with the **IT Infrastructure Department**. However, the LLM generated a confident and specific response that combined elements from different contexts — creating the illusion of accuracy without being grounded in factual data.
 
-<a href="https://img.alicdn.com/imgextra/i1/O1CN01C6ZkQG1uGdQbJVw19_!!6000000006010-2-tps-1478-732.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01C6ZkQG1uGdQbJVw19_!!6000000006010-2-tps-1478-732.png" width="800">
-</a>
+*(Screenshot: a Q&A example in which the bot's answer is not grounded in accurate context — illustrating hallucination caused by unreliable retrieval.)*
 
 This highlights a critical issue: the answer was not based on accurate or unambiguous context, but rather on the model's aggregation or assumptions—potentially resulting in misleading conclusions.
 
@@ -179,9 +177,7 @@ Ragas provides the following key evaluation metrics:
     * Context recall: Measures how many of the relevant reference materials are successfully retrieved; a higher score indicates fewer relevant documents are missed.
 These metrics provide a structured way to evaluate and improve the performance of your Q&A bot, ensuring that it delivers accurate, relevant, and well-supported responses.
 
-<a href="https://img.alicdn.com/imgextra/i4/O1CN01b2lVQp21JZCJy6Nfe_!!6000000006964-0-tps-739-420.jpg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01b2lVQp21JZCJy6Nfe_!!6000000006964-0-tps-739-420.jpg" width="500">
-</a>
+
 
 ### 2.1 Evaluating the response quality of RAG applications
 
@@ -332,9 +328,16 @@ To address this, Ragas uses an LLM to generate lists of assertions for both the 
 
 The following diagram illustrates how Ragas evaluates factual accuracy:
 
-<a href="https://img.alicdn.com/imgextra/i1/O1CN01v8tUjW1nsvFM9NJJA_!!6000000005146-2-tps-2298-868.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01v8tUjW1nsvFM9NJJA_!!6000000005146-2-tps-2298-868.png" width="1000">
-</a>
+*Figure (translated): assertion-based evaluation — an LLM turns both the answer and the ground truth into assertion lists, which are then compared to produce a score.*
+
+```mermaid
+flowchart LR
+    A["Generated answer"] --> LA["LLM produces assertion list"]
+    G["Ground truth"] --> LG["LLM produces assertion list"]
+    LA --> C["Compare assertion sets"]
+    LG --> C
+    C --> V["Verdict + score"]
+```
 
 1. Generate respective lists of assertions for the answer and ground truth using a LLMs. For example:
     - **Generate the assertion list for the answer**: Michael Johnson is a colleague in the Course Development Department responsible for big data direction. ---> ["*Michael Johnson is in the Course Development Department*", "*Michael Johnson is responsible for big data direction*"]
@@ -559,9 +562,7 @@ When a user asks a question, the LLM provides an answer by reading and comprehen
 
 To avoid losing effective knowledge, some suggest "cramming everything into the LLM" and letting it figure it out. However, this creates a more complex problem: even if a key clue exists within a large volume of data, the LLM may "overlook" it if it is buried in a sea of irrelevant information. This is known as the "**Lost in the Middle**" phenomenon in RAG systems. Imagine the information about "**Michael Johnson's department**" is a simple sentence: "**Michael Johnson, the Course Development Department, ID XXXX**." If this sentence is sandwiched between hundreds of pages of attendance records, meeting minutes, or even the company cafeteria menu, the LLM is likely to get lost in the redundancy. Its "attention" is scattered, and the key information is "drowned out."
 
-<a href="https://img.alicdn.com/imgextra/i4/O1CN01Nmswog1N4px5QKz0E_!!6000000001517-2-tps-1398-760.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01Nmswog1N4px5QKz0E_!!6000000001517-2-tps-1398-760.png" width="500">
-</a>
+*(Figure: the RAG accuracy bottleneck usually lies in the retrieved knowledge, not in how "smart" the LLM is.)*
 
 Therefore, the bottleneck of RAG accuracy often lies not in whether the LLM is "smart" enough, but in the "**Knowledge Concentration**" of the context provided. A high-quality context should have high knowledge density, meaning the relevant information is concentrated, noise is minimized, and it is directly related to the question. This allows the LLM to focus accurately on the core of the problem. Thus, the quality of the context you provide directly determines the upper limit of your RAG system.
 
@@ -573,7 +574,7 @@ This metric evaluates the **retrieval** phase of your RAG application. A low con
 
 - **Check the Knowledge Base**
 
-    <img src="https://wanx.alicdn.com/wanx/1937257750879544/text_to_image_lite_v2/6e4ca1055a0c467992b6b719b443a33e_0.png?x-oss-process=image/watermark,image_aW1nL3dhdGVybWFyazIwMjQxMTEyLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSxtX2ZpeGVkLHdfMzAzLGhfNTI=,t_80,g_se,x_10,y_10/format,webp" width="300">
+    *(Figure: query rewriting — reformulating the user's question so it better matches the knowledge base.)*
 
     The knowledge base is the source of a RAG application. If the content within it is incomplete or insufficient, it can lead to inadequate reference information being retrieved, which directly impacts context recall—the ability of the system to retrieve relevant information that supports accurate and meaningful answers.
 
@@ -586,7 +587,7 @@ This metric evaluates the **retrieval** phase of your RAG application. A low con
 
 - **Replace the Embedding Model**
 
-    <img src="https://img.alicdn.com/imgextra/i4/O1CN01MMsV3b1U2GzviZv6y_!!6000000002459-2-tps-991-320.png" width="750">
+    *(Figure: swapping in a stronger embedding model to improve retrieval quality.)*
 
     If your knowledge base content is already comprehensive and well-structured,  it may be beneficial to replace the embedding model used for vectorization. A high-quality embedding model can better capture the deep semantic meaning of text, allowing for more accurate and meaningful similarity comparisons between queries and retrieved content.
 
@@ -598,7 +599,7 @@ Even though the two sentences don’t share many surface-level words, a strong e
 
 - **query rewriting**
 
-    <img src="https://img.alicdn.com/imgextra/i1/O1CN01RpktVQ1FEtg8r4QCX_!!6000000000456-2-tps-1704-1322.png" width="800">
+    *(Figure: optimizing the knowledge base — check that its content is complete and accurate before touching other components.)*
 
     As a developer, it's unrealistic to expect users to phrase their questions in a specific or detailed way. Therefore, you might receive vague or ambiguous queries such as: "Course Development Department," "Leave Request," or "Project Management." If these questions are directly input into a RAG application, they are unlikely to retrieve relevant and effective text segments. To address this, you can design a prompt template by organizing common employee questions and use LLMs to rewrite the queries, improving the accuracy of the retrieval process.
 
@@ -642,9 +643,14 @@ The ground truth in the evaluation dataset must be provided by **domain experts*
 In LLM application development, **evaluation should come before optimization**, not "optimize first, then evaluate to see the results."
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i2/O1CN01BWJp3p1PTEHF74s06_!!6000000001841-2-tps-2320-1560.png" target="_blank">
-    <img src="https://img.alicdn.com/imgextra/i2/O1CN01BWJp3p1PTEHF74s06_!!6000000001841-2-tps-2320-1560.png" width="700">
-    </a>
+    *Figure (translated): evaluation-first optimization strategy.*
+
+```mermaid
+flowchart LR
+    Ev["Run evaluation metrics"] --> Diag["Diagnose the weak component"]
+    Diag --> Opt["Optimize (knowledge base / embedding / query rewriting)"]
+    Opt --> Ev
+```
     <p><em>Figure: Evaluation-First Optimization Strategy</em></p>
 </div>
 
@@ -687,9 +693,7 @@ The diagram below shows a complete evaluation operations system architecture:
 
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i2/O1CN01D3UVks1bfOBLCaS50_!!6000000003492-2-tps-2628-1468.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01D3UVks1bfOBLCaS50_!!6000000003492-2-tps-2628-1468.png" width="900">
-</a>
+    *(Figure: architecture of an evaluation-operations system — automated evaluation pipelines wired into the daily operation of the RAG application.)*
     <p><em>Figure: Evaluation Operations System Architecture Diagram</em></p>
 </div>
 

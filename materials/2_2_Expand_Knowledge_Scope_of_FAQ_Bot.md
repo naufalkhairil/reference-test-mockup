@@ -29,7 +29,14 @@ Using an embedding model to convert text chunks (or paragraphs) into numerical r
 1. **Index Storage**<br>
 The resulting vectors are stored in a specialized database (a vector database) to make them efficiently searchable and avoid reprocessing the documents for every query.
 
-    <img src="https://img.alicdn.com/imgextra/i3/O1CN01h0y0Uy1WH30Q7FRDJ_!!6000000002762-2-tps-1592-503.png" width="1000"><br>
+    *Figure (translated): the RAG indexing pipeline.*
+
+```mermaid
+flowchart LR
+    Docs["Documents"] --> Chunk["Chunking (split into segments)"]
+    Chunk --> Embed["Embedding model (text → vectors)"]
+    Embed --> Store[("Vector database")]
+```<br>
 
     After indexing, RAG applications can retrieve relevant text segments based on user questions.
 
@@ -42,7 +49,16 @@ Retrieval is the most critical part of the RAG application. Just as finding the 
 After finding the relevant information, you use it to construct your answer. Similarly, after retrieving relevant text segments, the RAG application generates the final prompt by combining the question and the retrieved text segments using a prompt template. The LLM then generates the response, leveraging its summarization abilities rather than relying solely on its internal knowledge.
     > A typical prompt template is: `Please answer the user's question based on the following information: {retrieved text segments}. The user's question is: {question}.`
 
-    <img src="https://img.alicdn.com/imgextra/i4/O1CN01h8V8p81ZJkCl5JB4R_!!6000000003174-2-tps-2890-802.png" width="1000"><br>
+    *Figure (translated): the RAG retrieval-and-generation pipeline.*
+
+```mermaid
+flowchart LR
+    Q["User question"] --> E["Embedding model"]
+    E --> S["Similarity search in vector DB"]
+    S --> K["Top-k relevant chunks"]
+    K --> P["Prompt template: question + chunks"]
+    P --> M["LLM generates the answer"]
+```<br>
 
 ## 2. Creating a RAG application
 
@@ -52,7 +68,7 @@ Building a RAG application by implementing the functionalities described above c
 
 Before running the code in this section, ensure you are using the correct Python environment, such as the `Python (llm_learn)` environment created in  previous lessons.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01B9bNMT27MDFvpBmnc_!!6000000007782-2-tps-1944-448.png" width="800">
+*(Screenshot: DSW notebook showing how to check/switch the Python environment (`Python (llm_learn)`).)*
 
 **Note: In each subsequent lesson, you should check whether you need to manually switch the Notebook environment.**
 
