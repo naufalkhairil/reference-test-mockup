@@ -1,4 +1,4 @@
-# 3.7 Hands-On with Qwen Code: Mastering the Coding Agent's Daily Workflow
+# 3.7 Hands-On with [Qwen Code](https://qwen.ai/qwencode): Mastering the Coding Agent's Daily Workflow
 
 ## 🚄 Introduction
 
@@ -23,11 +23,10 @@ By the end of this lesson, you will be able to:
 
 ## Installing Qwen Code
 
-<a href="https://qwen.ai/qwencode">Qwen Code</a> is an open-source terminal AI agent from the Qwen team that can understand a codebase, call tools, and autonomously complete programming tasks. This entire lesson is done inside Qwen Code, so please install it first:
+Qwen Code is an open-source terminal AI agent from the Qwen team that can understand a codebase, call tools, and autonomously complete programming tasks. This entire lesson is done inside Qwen Code, so please install it first:
 
 > One-click install of Qwen Code (about 1 minute).
 > After installation, please launch it by typing `qwen` in a terminal — do not run it inside the Notebook.
-
 
 <style>
     table {
@@ -70,15 +69,15 @@ bash -c "$(curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/inst
 </tbody>
 </table>
 
-After installation finishes, open a **new terminal window** (in DSW, click the Terminal menu at the top, then click the <img src="https://img.alicdn.com/imgextra/i3/O1CN01KUih3o1Zbbgyz3Y4j_!!6000000003213-2-tps-24-24.png" width="16" style="vertical-align: middle;"> icon in the upper right), type `qwen` to start it, and complete login in three steps:
+After installation finishes, open a **new terminal window** (in DSW, click the Terminal menu at the top, then click the  icon in the upper right), type `qwen` to start it, and complete login in three steps:
 
 1. Choose a model provider — the default **Qwen** is fine
 2. Choose **OAuth Login**; Qwen Code will generate an authorization link
 3. Open the link in a browser, log in to your Qwen account, and click **Authorize**
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN011b19G41wJ2nomCOiL_!!6000000006286-2-tps-3493-1413.png" width="700">
+*(Screenshot: `qwen` CLI login — choose a model provider, the terminal generates an authorization link, open it in a browser, log in and click Authorize to complete login (1,000 free requests per day with OAuth).)*
 
-Once authorized, the terminal will automatically complete the login. With OAuth you get 1,000 free requests per day. For more configuration options, see the <a href="https://qwen.ai/qwencode">official Qwen Code documentation</a>.
+Once authorized, the terminal will automatically complete the login. With OAuth you get 1,000 free requests per day. For more configuration options, see the [official Qwen Code documentation](https://qwen.ai/qwencode).
 
 ## 1 From Concepts to a Tool: How Qwen Code Integrates Everything You've Learned
 

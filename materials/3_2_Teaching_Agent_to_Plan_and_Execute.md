@@ -107,7 +107,11 @@ Output the reflection result and revision suggestions.
 {original_notebook_content}
 ```
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01FDYKQT1dp7okaEHNo_!!6000000003784-55-tps-738-127.svg" width="700">
+*Figure (translated): single model call with generation, reflection, and correction all-in-one.*
+
+```text
+[Course draft] -> [Single LLM call: generate + reflect + correct (all-in-one)] -> [Output result]
+```
 
 This method has its advantages: the model can spot and fix problems in a timely manner during generation, while keeping the context coherent and reducing the overhead of multiple round-trips.
 
@@ -141,7 +145,14 @@ Please compare [Original content] and [Polished content]:
 
 ```
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN016EcX4u1xzvTOhRTCC_!!6000000006515-55-tps-976-243.svg" width="700">
+*Figure (translated): writer + reviewer.*
+
+```text
+[Course draft] -> [Writing Agent: generate content] -> [Review Agent: independent perspective check]
+                      ^                                        |
+                      |                (feedback: issues)      | (passed)
+                      └────────────────────────────────────────┴──────► [Output result]
+```
 
 Because the review Agent's perspective differs from the writing Agent's, this method effectively avoids most role bias. You can even set up multiple specialized review Agents — fact review, logic review, style review, security review — which not only improves the comprehensiveness of the review but also facilitates later A/B testing and metric statistics.
 
@@ -159,7 +170,7 @@ But this method also has an obvious cost: each additional review Agent adds one 
 >
 > In the "generate-feedback" loop, the original course document is passed repeatedly across multiple model calls — the writing Agent needs it, the review Agent needs it, and the correction stage may need it again. If the document is long (e.g. a full course with dozens of code examples), this repetition brings significant token consumption.
 >
-> Alibaba Cloud Model Studio provides a <a href="https://help.aliyun.com/zh/model-studio/context-cache">Context Cache</a> mechanism to solve this: on the first call it caches the shared content (such as the original document), and subsequent calls that detect the same prefix reuse it directly; the cache-hit portion is billed at 20% of the standard unit price.
+> Alibaba Cloud Model Studio provides a [Context Cache](https://help.aliyun.com/zh/model-studio/context-cache) mechanism to solve this: on the first call it caches the shared content (such as the original document), and subsequent calls that detect the same prefix reuse it directly; the cache-hit portion is billed at 20% of the standard unit price.
 >
 > You can organize the prompt structure like this:
 > ```
@@ -205,7 +216,20 @@ The specific workflow is as follows:
 3.  **Obtain external feedback**: the tool returns the execution result; suppose it hits an error: `TypeError: get_user_data() got an unexpected keyword argument 'usr_id'`.
 4.  **Correct**: the Agent receives this error feedback and now clearly knows what went wrong with the code. Based on this feedback, it generates the corrected code.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01p4pTbF1FHBgu1CmSE_!!6000000000461-55-tps-1532-196.svg" width="700">
+*Figure (translated): self-correction loop driven by code-execution feedback.*
+
+```text
+[User input / document] -> [Writing Agent generates notebook (with erroneous code)]
+                                     |
+                                     v
+                            [Code interpreter executes code]
+                                     |
+                                     v
+[Agent corrects: reverts the wrong change to user_id] <- (external feedback: TypeError, usr_id)
+                                     |
+                                     v
+                          [Final correct notebook]
+```
 
 Below is a simple example implemented with AgentScope. AgentScope's built-in `execute_python_code` tool doesn't require manually creating a tool function; you just register it via `toolkit.register_tool_function(execute_python_code)`.
 
@@ -225,7 +249,6 @@ from agentscope.memory import InMemoryMemory
 from agentscope.message import Msg
 from agentscope.model import DashScopeChatModel
 from agentscope.tool import Toolkit, execute_python_code
-
 
 # ============================================================
 # Create the writing Agent (equipped with the code-interpreter tool)
@@ -262,7 +285,6 @@ def create_writer_agent() -> ReActAgent:
     )
 
     return writer
-
 
 # ============================================================
 # Main flow
@@ -435,7 +457,11 @@ The key to building a workflow is understanding the business and making the most
 
 This is the most basic, most intuitive workflow. It decomposes a task into multiple fixed steps executed in order. The output of the previous step strictly serves as the input to the next, and the whole process is like a factory assembly line — one-directional and immutable. The RAG Q&A bot you built earlier in this course is a perfect embodiment of this pattern.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01qoedS1202nBPFnvYj_!!6000000006792-55-tps-1033-70.svg" width="700">
+*Figure (translated): the pipeline pattern — one-directional and immutable.*
+
+```text
+[Course draft] -> [Code extractor] -> [Code validator] -> [Report generator] -> [Final report]
+```
 
 ```python
 """
@@ -521,7 +547,13 @@ The pipeline's rigidity is its biggest advantage and its most fatal flaw. It can
 
 To overcome the pipeline's rigidity, you need to introduce decision-making ability. The core of the branching pattern is to set up a "router" or "dispatch center" at the start or key nodes of the workflow. This decision node analyzes the input (e.g. the user's review request) and, like a traffic officer, directs the task to different preset processing paths (i.e. different pipelines or experts).
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN012SjTzf1eal0YTt2eq_!!6000000003888-55-tps-935-270.svg" width="700">
+*Figure (translated): the router pattern.*
+
+```text
+                             ┌──► [Code quick-check expert] ──────┐
+[Review request] -> {Task distributor / router}                  ├──► [Chief reviewer] -> [Output result]
+                             └──► [Language polishing expert] ────┘
+```
 
 ```python
 """
@@ -572,7 +604,6 @@ async def branch_full_review(user_msg: Msg) -> Msg:
     )
     disable_console_output([agent])
     return await agent(user_msg)
-
 
 async def run_branching() -> None:
     router = create_agent(
@@ -631,7 +662,14 @@ Branching is essentially "choose one of many," and it's still **serial**. It can
 
 When a request can be decomposed into multiple independent subtasks, making them queue up and wait is a huge waste. The core idea of the parallel-execution pattern is "doing things simultaneously." It first breaks a complex task into multiple subtasks, then distributes these subtasks to different execution units (Agents or tools) to process at the same time, and finally aggregates all the results into the final output.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01toenC81XZCLjsLHL4_!!6000000002937-55-tps-1045-420.svg" width="700">
+*Figure (translated): parallel review with a chief editor merge.*
+
+```text
+                 ┌─► [Code checker] ───────────┐
+                 ├─► [Fact checker] ───────────┤
+[Course content] ┼─► [Pedagogy evaluator] ─────┼─► [Chief editor: summary] ──► [Comprehensive report]
+                 └─► [Style editor] ───────────┘
+```
 
 ```python
 """
@@ -720,7 +758,13 @@ The premise of this pattern is that the subtasks are **mutually independent**. I
 
 Unlike parallel execution, which aims to improve efficiency, the core goal of the Mixture-of-Agents pattern is to **pursue ultimate quality, robustness, and creativity**. MoA's core idea is based on a key finding: **different LLMs have their own unique strengths and specialties, and when a model can reference the outputs of other models, it often generates a higher-quality response — a phenomenon called model "Collaborativeness."** MoA's approach is to have multiple **different LLMs** process **the same task** simultaneously, then have an aggregation model synthesize, analyze, and fuse all the outputs, producing a final result that far surpasses the level of any single model.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01eQoVAt1TAEIJqoxM4_!!6000000002341-55-tps-1003-578.svg" width="700">
+*Figure (translated): LLM debate — analysts generate, an aggregator picks the best solution.*
+
+```text
+                 ┌─► [Analyst 1: Qwen3-Max] ─────────┐
+[Same task] ─────┼─► [Analyst 2: DeepSeek-V3.2] ─────┼─► [Aggregator: Qwen3-Max] ──► [Best solution]
+                 └─► [Analyst 3: Kimi-K2-Thinking] ──┘
+```
 
 ```python
 """
@@ -836,7 +880,13 @@ The MoA shown above is a "2-layer structure": the first layer has multiple exper
 
 **Implementation points**:
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01cwiRT91bVJS7AKQSH_!!6000000003470-55-tps-1471-419.svg" width="700">
+*Figure (translated): three-layer debate — analysts, reviewers, then aggregator.*
+
+```text
+Layer 1: [Analyst 1: Qwen3-Max] ──────► Layer 2: [Reviewer 1: Qwen3-Max] ─────────┐
+         [Analyst 2: DeepSeek-V3.2] ──►          [Reviewer 2: DeepSeek-V3.2] ─────┼─► Layer 3: [Aggregator: Qwen3-Max] ──► [Best solution]
+         [Analyst 3: Kimi-K2-Thinking] ►         [Reviewer 3: Kimi-K2-Thinking] ──┘
+```
 
 ```python
 async def run_multi_layer_moa() -> None:
@@ -965,7 +1015,16 @@ You can balance cost and quality with the following strategies:
 
 So far, all the workflows you've designed are fully automated. However, in the real world, handing all decision-making power entirely to AI carries risks, especially when dealing with ambiguous teaching concepts or high-value course content. The human-in-the-loop pattern no longer pursues full automation; instead, it **intentionally designs one or more "pause nodes" in the workflow, returning control to a human**, who makes decisions, approvals, or quality checks before handing the task back to the workflow to continue. This is a key pattern for building trustworthy, safe AI systems.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01olPI4m1HVxhNUB1wz_!!6000000000764-55-tps-851-205.svg" width="700">
+*Figure (translated): human-in-the-loop.*
+
+```text
+[Course content] -> [AI analyst: provides suggestions] -> [AI rewriter: executes modifications] -> {Human expert review}
+       ^                                                                                               |
+       └──────────────────────────── (when uncertain, send back) ◄──────────────────────────────────────┘
+                                                                                                       │ (approved)
+                                                                                                       v
+                                                                                                [Final version]
+```
 
 ```python
 """
@@ -980,7 +1039,6 @@ from agentscope.model import DashScopeChatModel
 from agentscope.formatter import DashScopeMultiAgentFormatter
 from agentscope.tool import Toolkit, ToolResponse
 from chatbot.agent import create_agent, disable_console_output
-
 
 # Wrap human intervention as a tool: ask_human_decision
 async def ask_human_decision(question: str) -> ToolResponse:
@@ -1002,7 +1060,6 @@ async def ask_human_decision(question: str) -> ToolResponse:
             TextBlock(type="text", text=reply.get_text_content()),
         ]
     )
-
 
 async def run_hitl() -> None:
     # AI: give a revision suggestion
@@ -1059,7 +1116,6 @@ async def run_hitl() -> None:
     print(final_action.content)
     print("=" * 50)
 
-
 async def main() -> None:
     await run_hitl()
 
@@ -1113,13 +1169,28 @@ The bot faithfully launches the workflow you preset:
 
 At this point, your bot can't continue. Because the process it was designed with has no step to handle the unexpected situation "the competitor-analysis tool failed."
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01xWVzLA1PLRWphDkBR_!!6000000001824-55-tps-987-375.svg" width="700">
+*Figure (translated): without exception handling, the workflow gets stuck.*
+
+```text
+                              ┌─► [Industry needs: success] ──────────────┐
+[Python course research] ───►{Parallel execution}├─► [User profile: success] ────────────────┼─► [Summary results]
+                              └─► [Competitive analysis: website redesign cannot be parsed] ──┘
+                                                              |
+                                                              v
+                                                  [Process interrupted: stuck]
+```
 
 ### 3.2 The naive solution: add a new branch
 
 You'll think, just add an exception-handling branch to the workflow. You can add a branch to the original fixed process: if `analyze_competitor_course` fails, execute a new step, such as reminding the course designer to handle it manually.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01wJwRQW1dXilbRgnqj_!!6000000003746-55-tps-1432-514.svg" width="700">
+*Figure (translated): exception handling via human intervention.*
+
+```text
+                              ┌─► [Industry needs: success] ──────────────────────────┐
+[Python course research] ───►{Parallel execution}├─► [User profile: success] ────────────────────────────┼─► [Summary of results] ──► [Process completed]
+                              └─► [Competitive analysis: website redesign cannot be parsed] ─► [Human intervention] ──┘
+```
 
 This "patching" solution seems effective, but what if next time the industry-needs-analysis API fails due to temporary maintenance? Do you add another branch? What if, when defining the user persona, the required data-source format changes? Add yet another branch?
 
@@ -1149,7 +1220,15 @@ Its workflow becomes:
 2.  **Dynamic planning**: the Agent's "brain" (the LLM) first thinks, decomposes the goal, and dynamically generates an **action Plan** containing multiple steps.
 3.  **Execute the plan**: an execution program receives this plan, then calls tools in order to complete each step, just like executing an ordinary workflow.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN012mm1Qg1KShjGlWgnM_!!6000000001163-55-tps-1233-169.svg" width="700">
+*Figure (translated): plan-and-execute.*
+
+```text
+[User goal: research Python course] -> [Agent: planning] -> [Dynamically generated plan] -> [Executor]
+                                                                                              |
+      ┌───────────────────────────────────────────────────────────────────────────────────────┤
+      v                                                                                       v
+[Tool 1: industry needs]   [Tool 2: user profile]   [Tool 3: competitive analysis] ...   ──► [Completed]
+```
 
 In this new mode, the "plan" itself becomes data that can be generated and executed. The LLM is no longer a fixed link in the process, but the **creator** of the process.
 
@@ -1165,7 +1244,6 @@ from agentscope.message import Msg, TextBlock
 from agentscope.model import DashScopeChatModel
 from agentscope.tool import Toolkit, ToolResponse
 from agentscope.plan import PlanNotebook
-
 
 # Simulated business tools
 async def analyze_competitor_course(url: str) -> ToolResponse:
@@ -1195,7 +1273,6 @@ async def extract_text_from_pdf(url: str) -> ToolResponse:
         TextBlock(type="text", text=f"\u2705 Extracted the outline text from {url}: 1. Variables and data types... 2. ...")
     ])
 
-
 # Hook function used to monitor plan changes
 plan_snapshots = []
 
@@ -1215,7 +1292,6 @@ def capture_plan_snapshot(notebook, plan):
                 for st in plan.subtasks
             ]
         })
-
 
 async def main():
 
@@ -1276,7 +1352,6 @@ async def main():
         for i, subtask in enumerate(final_plan["subtasks"], 1):
             icon = "\u2705" if subtask["state"] == "finished" else "\u23f3"
             print(f"  {icon} {i}. {subtask['name']}")
-
 
 await main()
 ```
@@ -1367,7 +1442,19 @@ When the Agent recognizes that existing tools can't meet the need, its plan incl
 3.  **Call the new tool**: after the new tool is successfully created in the code-execution environment, the Agent can directly call it in subsequent plan steps, as if the tool had existed from the start.
 4.  **Extend the tool library**: this newly-generated tool can be added to the temporary tool library for this task, for reuse in subsequent steps.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01CmFXKH1jIVImcsWQh_!!6000000004525-55-tps-1430-373.svg" width="700">
+*Figure (translated): autonomous tool creation.*
+
+```text
+[Receive task] -> [Agent analyzes requirements] -> {Are existing tools sufficient?}
+                                                    | (yes)                       | (no)
+                                                    v                             v
+                                    [Use existing tools: complete task]   [Create new tool: identify gaps -> generate code]
+                                                    |                             |
+                                                    └──────────► [Execute: register -> invoke tool]
+                                                                      |
+                                                                      v
+                                                 [Task completed; tool library expanded (reusable)]
+```
 
 Below is a simple example built with AgentScope. During planning, the Agent can, based on the existing `add` tool, autonomously create and register a `factorial` tool and call it in subsequent tasks.
 
@@ -1387,7 +1474,6 @@ from agentscope.tool import Toolkit, ToolResponse
 
 # Global toolkit
 toolkit = None
-
 
 async def code_exec(code: str) -> ToolResponse:
     """Code interpreter - used to create and register new tools"""
@@ -1418,14 +1504,12 @@ async def code_exec(code: str) -> ToolResponse:
             text=f"\u274c Error: {e}"
         )])
 
-
 async def add(a: float, b: float) -> ToolResponse:
     """Addition tool"""
     return ToolResponse(content=[TextBlock(
         type="text",
         text=f"{a} + {b} = {a + b}"
     )])
-
 
 async def main():
     if "DASHSCOPE_API_KEY" not in os.environ:
@@ -1479,7 +1563,6 @@ async def main():
     for i, s in enumerate(toolkit.get_json_schemas(), 1):
         print(f"{i}. {s['function']['name']}")
 
-
 if __name__ == "__main__":
     await main()
 ```
@@ -1518,7 +1601,20 @@ When the user gives the instruction "Search Amazon for books about AI":
 4.  **Loop execution**: it continues this "perceive-plan-act" loop until all steps are complete, and returns the list of books it found.
 5.  **Exception handling**: if it encounters something unexpected at any step, such as a CAPTCHA popping up after clicking search, it doesn't get stuck. It perceives this new situation and inserts "handle the CAPTCHA" as a new obstacle into the current plan, trying to solve it or asking the user for help.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01s7aonw1cWyVP50Hc2_!!6000000003609-55-tps-1909-375.svg" width="700">
+*Figure (translated): a planning agent driving a browser.*
+
+```text
+[Goal: search AI books on Amazon] -> [LLM initial planning] -> [Generate action: open amazon.com] -> [Browser executes operation]
+                                                                                                            |
+                                                                                                            v
+                                                                                                [Perceive page state (HTML + screenshot)]
+                                                                                                            |
+                                                                                                            v
+                                                                                       {LLM decision: analyze page, plan next step}
+                                                                                       | (task completed)          | (unexpected issue)
+                                                                                       v                           v
+                                                                            [Output result: book list]     [Re-plan] ──► (back to generating actions)
+```
 
 This case fully demonstrates the core advantage of a planning-type Agent: it's no longer a script executor, but achieves truly **adaptive** operation of dynamic, unknown web environments through a continuous "perceive-plan-act" loop.
 
@@ -1534,7 +1630,6 @@ Let's recap what you learned in this section:
 *   **Trade-off between stability and flexibility**: "autonomous planning" suits innovative tasks that explore the unknown and have variable processes, while "fixed workflows" guarantee the stability and efficiency of core business. In production, you need to combine strategies like human-in-the-loop and explore-then-solidify, and make a wise choice between these two modes based on your specific business needs.
 
 ## 🔥 Quiz
-
 
 ### 🔍 Single choice 3.2.1
 <details>

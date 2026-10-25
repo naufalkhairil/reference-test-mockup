@@ -23,7 +23,7 @@ Please refer to "[1_0_Setup_Computing_Environment](https://edu.aliyun.com/course
 
 1. Ensure that the new instance has a **different name** from any previously created instance, such as `acp_gpu`  
 2. For **resource specifications**, select `ecs.gn7i-c8g1.2xlarge` (this specification includes **one A10 GPU with 30GB of memory**).
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01L3iYeb1MRuEvXhhcD_!!6000000001432-2-tps-2984-1582.png" width="900">  
+*(Screenshot: ECS configuration page — select the `ecs.gn7i-c8g1.2xlarge` specification (one A10 GPU with 30GB of memory) and the `modelscope:1.29.0-pytorch2.3.1tensorflow2.16.1-gpu-py311-cu121...` image.)*  
 3. For the **image**, choose `pytorch2.3.1`, for example `modelscope:1.29.0-pytorch2.3.1tensorflow2.16.1-gpu-py311-cu121-ubuntu22.04` (you need to switch the "Image Configuration" -> "Chip Type" to GPU).
 
 After the instance is successfully created and its status is `Running`, enter the following command in the `Terminal` to obtain the ACP course code:
@@ -139,7 +139,7 @@ With the cost function, the task of finding suitable model parameters can be equ
 
 If you plot the cost function, the task of finding the optimal solution essentially involves finding the lowest point on the curve or surface.
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i4/O1CN0149XTTS1WUKSTtpeoh_!!6000000002791-2-tps-2314-1682.png" style="width: 400px; display: block; margin-left: auto; margin-right: auto"/>
+*(Figure: prompt tuning — learnable prompt vectors are prepended to the input to indirectly control model behavior.)*
 </div>
 
 > In real-world projects, people often interchangeably use the terms cost function and loss function. In subsequent content and code, we will follow this engineering convention and refer to the cost function as the loss function.
@@ -151,8 +151,8 @@ In the previous figure, you can visually identify the lowest point. However, in 
 Gradient descent is one of the most common methods for this. A typical implementation of gradient descent starts by randomly selecting a starting point on the surface (or curve), then continuously making small adjustments to the parameters until it finds the lowest point (corresponding to the optimal parameter configuration).
 
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01ihhR9Y1IbkFZTQ3bV_!!6000000000912-1-tps-1080-810.gif" style="width: 400px;margin-left: auto; margin-right: auto"/>
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01meUISA1dHgq2mqm6V_!!6000000003711-1-tps-1080-810.gif" style="width: 400px;margin-left: auto; margin-right: auto"/>
+*(Figure: the direction of parameter adjustment is toward the flatter area, where the absolute value of the slope decreases.)*
+*(Figure: the loss curve — the optimal solution is the lowest point on the curve or surface.)*
 </div>
 
 When training a model, you need the training program to automatically adjust the parameters so that the value of the loss function approaches the lowest point. Therefore, the gradient descent algorithm must automatically control two aspects: the direction and the magnitude of parameter adjustment.
@@ -161,12 +161,16 @@ When training a model, you need the training program to automatically adjust the
 
 If the loss function is a U-shaped curve, you can intuitively see that the parameter adjustment should move in the direction where the absolute value of the slope decreases, that is, towards a flatter area.
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01ME3u6G203FVsQsmLe_!!6000000006793-2-tps-1608-1244.png" style="width: 400px; display: block; margin-left: auto; margin-right: auto"/>
+*Figure (translated): a neural network stacks layers to model intricate, non-linear mappings.*
+
+```text
+[Input X] -> [Layer 1: Y = σ(W·X)] -> [Layer 2] -> ... -> [Output Y]
+```
 </div>
 
 If the loss function is a surface in a three-dimensional coordinate system, the direction of parameter adjustment should similarly move towards a flatter area. However, at a certain point on the surface, there are multiple possible descending directions. To find the lowest point as quickly as possible, you should move in the steepest direction.
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01Uh8OxI1mqnkBHqMjH_!!6000000005006-1-tps-664-684.gif" style="width: 400px; display: block; margin-left: auto; margin-right: auto"/>
+*(Figure: when the loss is a 3D surface, move in the steepest-descent direction to find the lowest point as quickly as possible.)*
 </div>
 
 In mathematics, the gradient points in the direction of the steepest ascent from a point on the surface, and its opposite direction is the steepest descent.
@@ -185,13 +189,13 @@ Adjusting parameters with a fixed step size is the easiest approach, but this ma
 In the figure below, adjusting parameters with a fixed step size of 1.5 results in oscillation around the lowest value, but it's unable to reach the lowest point.
 
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01y7FatQ27bKI9CYCJ1_!!6000000007815-1-tps-938-646.gif" style="width: 400px; display: block; margin-left: auto; margin-right: auto"/>
+*(Animation: gradient descent rolls down the loss curve until it finds the lowest point, i.e. the optimal parameter configuration.)*
 </div>
 
 To avoid this issue, the adjustment magnitude should be reduced as you approach the lowest point. The closer you get to it, the smaller the slope should become. Instead of using a fixed step size, you can use the slope at the current position as the adjustment magnitude.
 
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01h45Ifb1xRZhXXIXEC_!!6000000006440-1-tps-892-618.gif" style="width: 400px; display: block; margin-left: auto; margin-right: auto"/>
+*(Figure: too large an adjustment step oscillates around the lowest value without ever reaching it.)*
 </div>
 
 However, some loss function curves are very steep, and simply using the slope may still cause oscillation around the lowest point. To address this, multiply the slope by a coefficient to regulate the step size. This coefficient is called the learning rate.
@@ -202,25 +206,23 @@ The choice of learning rate is particularly important for training effectiveness
     <!-- Column 1 -->
     <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px">
         <p style="margin-top: 10px">An appropriate learning rate allows you to find suitable parameters in a short time.</p>
-        <img src="https://img.alicdn.com/imgextra/i3/O1CN01NrvVfj1sCqtKHLyia_!!6000000005731-2-tps-1680-1224.png" style="width: 100%; height: auto; border-radius: 3px"/>
+        *(Figure: gradient descent remains effective on high-dimensional, complex loss functions — backpropagation computes the gradients layer by layer.)*
     </div>
     <!-- Column 2 -->
     <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px">
         <p style="margin-bottom: 10px">An excessively low learning rate, while capable of finding suitable parameters, leads to greater time and resource consumption.</p>
-        <img src="https://img.alicdn.com/imgextra/i1/O1CN015dbcz61MCn8LkN2Ta_!!6000000001399-2-tps-1728-1300.png" style="width: 100%; height: auto; border-radius: 3px"/>
+        *(Figure: adapter tuning — small adapter layers are inserted at specific positions within the model.)*
     </div>
     <!-- Column 3 -->
     <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px">
         <p style="margin-bottom: 10px">Meanwhile, an excessively high learning rate may cause you to skip the optimal solution, ultimately failing to find the lowest point.</p>
-        <img src="https://img.alicdn.com/imgextra/i1/O1CN01l4leTB1LKI0BcVs16_!!6000000001280-2-tps-1658-1262.png" style="width: 100%; height: auto; border-radius: 3px"/>
+        *(Chart: x-axis = number of trainable parameters, y-axis = task performance (accuracy / BLEU) — more trainable parameters do not always lead to better performance.)*
     </div>
 </div>
-
 
 A smaller learning rate, although more computationally expensive and time-consuming, enables the optimization process to converge more precisely toward the minimum of the cost function. In practical model training, dynamic adjustment of the learning rate is commonly employed to balance convergence speed and accuracy. For example, Alibaba Cloud's PAI also provides an [AutoML](https://www.alibabacloud.com/help/en/pai/user-guide/automl/) tool that can automatically search for an optimal learning rate, reducing manual tuning effort and improving training efficiency.
 
 #### 2.1.4 Key Hyperparameters in Model Training
-
 
 In the upcoming fine-tuning experiments, you'll be repeatedly adjusting parameters, observing results, and adjusting again. This section explains each parameter through the **real problems you'll encounter** during training.
 
@@ -283,7 +285,7 @@ In complex tasks such as text generation, both input x and output y are typicall
 To address this challenge, researchers have turned to neural networks—particularly deep (multi-layer) architectures—as powerful tools for modeling intricate, non-linear mappings.
 
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01QRD5MH1rwMdJHBzxi_!!6000000005695-2-tps-1080-533.png" style="width: 400px; display: block; margin-left: auto; margin-right: auto"/>
+*(Figure: an appropriate learning rate finds suitable parameters in a short time.)*
 </div>
 
 One layer of a neural network is generally expressed as $Y=σ(W⋅X)$, where the uppercase input $X$ and output $Y$ indicate they are multi-dimensional, $σ$ is the activation function, and $W$ represents the parameters of the assumed function $f$. A k-layer neural network can be expressed as $Y=σ(W_k ⋯ σ(W_2 ⋅σ(W_1⋅X)))$.
@@ -309,7 +311,7 @@ $= \left[ \begin{matrix} max(0, \sum\limits_{k=1}^{3}w_{1,k}×x_{k,1})& max(0, \
 Fortunately, the gradient descent method remains effective on high-dimensional, complex functions.
 
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN011caxP31GiUrEv1aGH_!!6000000000656-2-tps-847-779.png" style="width: 400px; display: block; margin-left: auto; margin-right: auto"/>
+*(Figure: reduce the adjustment magnitude as you approach the lowest point.)*
 </div>
 
 Now you have the winning combination:
@@ -365,7 +367,6 @@ To appreciate the value of this two-stage approach, let’s examine what it woul
     $$
 
 ---
-
 
 In summary, **reducing server unit price** and **shortening training time** can effectively reduce training costs, where **reducing memory requirements** lower server unit price, and reducing **total training data volume** shorten training time.
 
@@ -428,7 +429,6 @@ Popular PEFT methods include:
 * LoRA (Low-Rank Adaptation): A leading method that approximates weight changes using low-rank matrices—requiring only 0.1% to 1% of the original model’s parameters to be trained.
 
 Among these, LoRA has become the preferred choice in many real-world applications, particularly when compute, memory, or budget are limited.
-
 
 #### 2.2.2 LoRA Fine-tuning
 
@@ -511,9 +511,13 @@ $$
 During inference, the matrices $ A $, $ B $, and $ W^{\text{pre-trained}} $ can be merged into a single $ W^{\text{fine-tuned}} $ either **statically** (fused before deployment) or **dynamically** (computed on-the-fly), without affecting inference efficiency.
 
 <div style="text-align: center;">
-<a href="https://img.alicdn.com/imgextra/i3/O1CN01NtGavS1TTvIIeZxO1_!!6000000002384-2-tps-804-712.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01NtGavS1TTvIIeZxO1_!!6000000002384-2-tps-804-712.png" style="width: 300px;background:white;display: block; margin-left: auto; margin-right: auto"/>
-</a>
+*Figure (translated): LoRA freezes the original weights and trains only a low-rank delta.*
+
+```text
+Full fine-tuning:   W (d x d)            -> all d x d parameters updated
+LoRA:               W = W0 + ΔW          -> only A (r x d) and B (d x r) trained (r << d),
+                       (frozen)              W0 stays frozen
+```
 <br>Image source: LORA: LOW-RANK ADAPTATION OF LARGE LANGUAGE MODELS
 </div>
 
@@ -543,14 +547,12 @@ In practice, multiple factors should be considered when choosing $r$:
 
 > 💡 Note: Experiments in the LoRA original paper (Hu et al., 2021) demonstrate that the "intrinsic rank" of weight updates is typically quite small. The authors used the following $r$ values in their experiments across models of different scales: RoBERTa (125M/355M) with $r=8$, GPT-2 (345M) with $r=4$, and GPT-3 (175B) with $r=1$ to $r=8$. This suggests that the optimal choice of $r$ does not scale proportionally with model size, but requires careful trade-offs based on the specific task and available resources. See Section 7.2 of the paper: [What is the Optimal Rank r for LoRA?](https://arxiv.org/abs/2106.09685)
 
-
-
 #### 2.2.3 Effectiveness of LoRA Fine-tuning
 
 The authors of LoRA evaluated multiple fine-tuning methods across several tasks, plotting the number of trainable parameters (x-axis) against task performance (y-axis), such as accuracy or BLEU score:
 
 <div style="text-align: center;">
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01RGquUv1ZlDuoik8zU_!!6000000003234-2-tps-1944-662.png" style="width: 700px; background: white; display: block; margin-left: auto; margin-right: auto"/>
+*(Figure: an excessively low learning rate still finds suitable parameters, but consumes much more time and resources.)*
 </div>
 
 The results clearly show that **more trainable parameters do not always lead to better performance**—some methods even degrade with increased capacity. In contrast, **LoRA achieves performance close to full fine-tuning with only a tiny fraction of trainable parameters, demonstrating exceptional cost-effectiveness, scalability, and task adaptability.**
@@ -627,7 +629,7 @@ This framework supports a full pipeline of model operations—including training
 Moreover, ms-swift is highly user-friendly. During training, each time the validation loss (also called evaluation loss) is computed, the framework automatically saves the current model parameters (model_checkpoint). At the end of training, it retains the version with the lowest validation loss, which corresponds to the best_model_checkpoint shown in the figure below.
 
 <div style="text-align: center;">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN0150XsFO1xM4z7CUMNr_!!6000000006428-2-tps-2288-136.png" style="width: 70%;display: block; margin-left: auto; margin-right: auto"/>
+*(Figure: use the slope at the current position as the adjustment magnitude to avoid overshooting.)*
 </div>
 
 In the following experiments, we will focus on adjusting three key parameters:
@@ -680,12 +682,12 @@ At the same time, the framework automatically applies a learning rate decay stra
 
 | Training loss image | Evaluation loss image |
 | --- | --- |
-|<img src="https://img.alicdn.com/imgextra/i2/O1CN0122CqML1xiykiTglmo_!!6000000006478-2-tps-667-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> | <img src="https://img.alicdn.com/imgextra/i4/O1CN01AxXE0V1JqEORoVBdi_!!6000000001079-2-tps-667-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> |
+| |  |
 
 | **Observation metrics (training loss, validation loss):** | Training loss increases, validation loss increases |
 | --- | --- |
 | **Training status:** | **Training failed** |
-| **Cause analysis:** | The learning rate is likely too high. This causes the model's parameters to oscillate wildly instead of converging toward the optimal solution, resulting in training failure.<img src="https://img.alicdn.com/imgextra/i1/O1CN01l4leTB1LKI0BcVs16_!!6000000001280-2-tps-1658-1262.png" style="width: 300px;display: block; margin-left: auto; margin-right: auto"/>|
+| **Cause analysis:** | The learning rate is likely too high. This causes the model's parameters to oscillate wildly instead of converging toward the optimal solution, resulting in training failure.*(Chart: x-axis = number of trainable parameters, y-axis = task performance (accuracy / BLEU) — more trainable parameters do not always lead to better performance.)*|
 | **Adjustment logic:** | Significantly reduce the learning rate to $0.00005$, allowing the model to "learn cautiously" with smaller steps. |
 
 #### 3.3.2 Second experiment (takes about 2 minutes)
@@ -715,7 +717,7 @@ At the same time, the framework automatically applies a learning rate decay stra
 
 | Training loss image | Evaluation loss image |
 | --- | --- |
-|<img src="https://img.alicdn.com/imgextra/i3/O1CN01DgtNVX1EDgzHYamOE_!!6000000000318-2-tps-680-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> | <img src="https://img.alicdn.com/imgextra/i3/O1CN01621v4k1ErzqC24Z1b_!!6000000000406-2-tps-689-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> |
+| |  |
 
 | **Observation metrics (Training loss, Validation loss):** | Training loss decreases, validation loss also decreases |
 | --- | --- |
@@ -752,7 +754,7 @@ At the same time, the framework automatically applies a learning rate decay stra
 
 | Training loss image | Evaluation loss image |
 | --- | --- |
-|<img src="https://img.alicdn.com/imgextra/i4/O1CN01xsw3a31YarKvsEKCR_!!6000000003076-2-tps-671-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> | <img src="https://img.alicdn.com/imgextra/i3/O1CN01b2v3fK1jOSNo73Q3y_!!6000000004538-2-tps-680-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> |
+| |  |
 
 | **Observation metrics (Training Loss, Validation Loss):** | Training loss decreases, validation loss first decreases then increases |
 | --- | --- |
@@ -787,8 +789,7 @@ In general, with the scale of today's LLMs, fine-tuning requires at least **1,0
 
 | Training loss image | Evaluation loss image |
 | --- | --- |
-|<img src="https://img.alicdn.com/imgextra/i3/O1CN01p8rX0d1UAyUOGHeOJ_!!6000000002478-2-tps-671-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> | <img src="https://img.alicdn.com/imgextra/i1/O1CN01LjmbJ21P4Uo8ZJyav_!!6000000001787-2-tps-689-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> |
-
+| |  |
 
 | **Observation Metrics (Training Loss, Validation Loss):** | Training loss decreases, validation loss also decreases |
 | --- | --- |
@@ -819,8 +820,7 @@ In general, with the scale of today's LLMs, fine-tuning requires at least **1,0
 
 | Training loss image | Evaluation loss image |
 | --- | --- |
-|<img src="https://img.alicdn.com/imgextra/i4/O1CN01hyQhbn1p04zyTeQkv_!!6000000005297-2-tps-671-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> | <img src="https://img.alicdn.com/imgextra/i3/O1CN01oy2oZv1r0ejEmpYdQ_!!6000000005569-2-tps-680-451.png" style="width: 500px;display: block; margin-left: auto; margin-right: auto"/> |
-
+| |  |
 
 | **Observation Metrics (Training Loss, Evaluation Loss):** | Training loss basically does not decrease, evaluation loss also basically does not decrease and even slightly increases |
 | --- | --- |
@@ -954,7 +954,7 @@ Although this tutorial allows you to use prepared datasets and experience fine-t
         * Effective when the downstream task is similar to the pre-training objective (such as text classification).
         * May underperform on complex or highly divergent tasks due to limited adaptability.
 <div style="text-align: left;">
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01X9GOk81sgAEtxflGR_!!6000000005795-2-tps-1340-686.png" style="width: 600px;display: block; margin-left: 60px; margin-right: auto"/>
+*(Figure: an excessively high learning rate skips past the optimal solution and may never find the lowest point.)*
 </div>
 
 * **Adapter Tuning**: Small neural network modules called adapter layers are inserted at specific positions within the original model architecture (such as between transformer layers). During fine-tuning, the original model parameters are frozen—only the Adapter layers are trained. 
@@ -963,7 +963,7 @@ Although this tutorial allows you to use prepared datasets and experience fine-t
         * Slightly higher number of trainable parameters compared to LoRA, but delivers stable performance.
         * Requires structural modifications to the model, and introduces additional computational overhead during inference due to the extra layers.
 <div style="text-align: left;">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN016gccCd1CdDpjDxbe9_!!6000000000103-2-tps-1482-1048.png" style="width: 500px;display: block; margin-left: 60px; margin-right: auto"/>
+*(Figure: training curve — `best_model_checkpoint` is selected at the lowest validation loss.)*
 </div>
 
 * Prompt Tuning: Indirectly controls model behavior by introducing learnable input vectors (called prompts) during training. The original model parameters are frozen, and only these prompt embeddings are updated. 
@@ -1033,8 +1033,6 @@ Evaluation metrics differ significantly depending on the task type. Below are so
 </details>
 
 ---
-
-
 
 <details>
 <summary style="cursor: pointer; padding: 12px; border: 1px solid #dee2e6; border-radius: 6px;">

@@ -80,7 +80,22 @@ For a complex Agent system, you can't preset all the perfect evaluation metrics 
 
 This loop repeats continuously, and your evaluation system becomes more complete and precise as the Agent evolves. The figure below shows this complete closed-loop process:
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01pTWzMt20fiqgHgBKo_!!6000000006877-55-tps-1454-375.svg" width="700">
+*Figure (translated): the evaluation-driven closed loop.*
+
+```text
+[MVP] -> [Real execution] -> [Observe errors] -> [Extract metrics]
+                                                     │
+                                ┌────────────────────┴────────────────────┐
+                                v                                         v
+               [Objective metrics: executability /        [Subjective metrics: accuracy /
+                format / character count]                   teaching quality / style]
+                                │                                         │
+                                v                                         v
+                           [LLM evaluation]                       [Human evaluation]
+                                └────────────────────┬────────────────────┘
+                                                     v
+                                             [Aggregate score] -> [Improve agent] ──► (back to MVP)
+```
 
 As shown, starting from the MVP, through real runs, observing errors, and distilling metrics, then combining the two kinds of evaluation methods (objective and subjective), you finally form continuous improvement of the Agent. Next, we dive into how to design these two kinds of metrics.
 
@@ -186,7 +201,14 @@ The example below demonstrates "writing a lesson draft for a pandas data-analysi
 - Fine-grained subjective scoring (LLM-as-Judge): score five dimensions on a 1-5 scale — language clarity/ambiguity, whether there are factual errors, consistency of expression, redundancy of expression (less redundancy = higher score), readability; use structured output for stable scoring.
 Tracing (optional): set `AGENTSCOPE_STUDIO_URL` (to connect AgentScope Studio) or `OTEL_TRACING_URL` (to connect any OTLP-compatible backend) to automatically enable tracing; when unset, the example runs as usual.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01YQLioo1rfsRIJhD2J_!!6000000005659-55-tps-961-250.svg" width="700">
+*Figure (translated): example evaluation pipeline.*
+
+```text
+[Course benchmark: pandas task] -> [Generation agent] -> [Chapter draft: title / objectives / code / quiz]
+                                                                 |
+                                                                 v
+                                                          [Review agent] -> [Five-dimensional scoring] -> [Results summary]
+```
 
 ```python
 # Educational course writing (pandas) end-to-end evaluation: two lesson drafts + five-dimension LLM scoring
@@ -220,7 +242,6 @@ if studio_url:
 elif otel_url:
     agentscope.init(tracing_url=otel_url)
 
-
 # 1) Define a minimal benchmark (two lesson-writing tasks)
 COURSE_BENCHMARK = [
     {
@@ -251,7 +272,6 @@ COURSE_BENCHMARK = [
     },
 ]
 
-
 # 2) Define the structured-output model
 class CourseDraft(BaseModel):
     title: str = Field(description="lesson title")
@@ -259,7 +279,6 @@ class CourseDraft(BaseModel):
     lesson_content: str = Field(description="lesson body, a detailed draft of at least 180 words")
     code_example: str = Field(description="minimal runnable pandas code example")
     quiz: str = Field(description="one multiple-choice question (short)")
-
 
 # 3) Define the five-dimension LLM scoring structure and metric
 class EvalScore(BaseModel):
@@ -270,7 +289,6 @@ class EvalScore(BaseModel):
     readability: int = Field(description="readability, 1-5 (high = more readable)")
     overall: Optional[float] = Field(default=None, description="optional, total score 0-1")
     feedback: str = Field(description="a one-sentence improvement suggestion")
-
 
 class LLMEvalMetric(MetricBase):
     def __init__(self, eval_agent: ReActAgent, axis_weights: Optional[Dict[str, float]] = None):
@@ -373,7 +391,6 @@ class LLMEvalMetric(MetricBase):
         )
         return MetricResult(name=self.name, result=score, message=msg)
 
-
 # 4) Assemble into a Task list
 def build_tasks() -> list[Task]:
     tasks: list[Task] = []
@@ -389,7 +406,6 @@ def build_tasks() -> list[Task]:
             )
         )
     return tasks
-
 
 # 5) Create a minimal agent (real DashScope API call)
 agent = ReActAgent(
@@ -423,7 +439,6 @@ evaluator = ReActAgent(
     formatter=DashScopeChatFormatter(),
     enable_meta_tool=False,
 )
-
 
 # 6) Minimal evaluation loop
 async def run_minimal_eval() -> None:

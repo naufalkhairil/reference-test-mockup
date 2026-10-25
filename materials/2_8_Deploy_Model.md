@@ -58,7 +58,7 @@ Navigate to the course directory: `/mnt/workspace/aliyun_acp_learning/LLM_ACP_EN
 
 Open a new terminal window in this location to proceed with the deployment commands.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01TboZMt1pwFKnS6Gdx_!!6000000005424-2-tps-1460-1470.png" width="600">
+*(Screenshot: terminal window opened inside the course deployment directory.)*
 
 You can use the `pwd` command in the terminal window to check the current directory. 
 
@@ -96,8 +96,6 @@ If needed, switch to the course directory by running the following command:
 <tr>
 <td>  
 
-
-
 ```bash
 cd /mnt/workspace/aliyun_acp_learning/LLM_ACP_EN/p2_Build\ LLM\ Q\&A\ System/
 ```
@@ -122,7 +120,7 @@ First, download the model files to your local machine.
 
 Once downloaded, the model files will be saved in the `./model/qwen2_5-1_5b-instruct` folder.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01vTzOrP1n0sUaNfdIO_!!6000000005028-2-tps-710-666.png" width="300">
+*(Screenshot: terminal output after downloading the model files into `./model/qwen2_5-1_5b-instruct`.)*
 
 Next, install the dependencies by running the following command in the terminal window to install `vllm`. If you encounter version conflicts, you can alternatively install a specific version using `vllm==0.6.2`:
 
@@ -174,8 +172,6 @@ After installing vllm, execute the **vllm command** in the terminal  to start 
 <tr>
 <td>  
 
-
-
 ```bash
 vllm serve "./model/qwen2_5-1_5b-instruct" --load-format "safetensors" --port 8000
 ```
@@ -194,7 +190,11 @@ After the service starts successfully, the terminal window will display the mess
 
 This means the model service is now running and ready to accept inference requests via the specified endpoint.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01aJBpG11UvEWl0jdOr_!!6000000002579-2-tps-2806-952.png" width=1000>
+*Figure (translated): edge-cloud collaboration deployment.*
+
+```text
+[Edge device: lightweight pre-processing] -> [Cloud: LLM deep processing] -> [Results returned quickly]
+```
 
 Please note that closing the terminal window will immediately terminate the model service. Since subsequent tests and performance evaluations depend on this service, do not close the window.
 
@@ -241,8 +241,6 @@ Open a new terminal window and run the following `vllm` command:
 <tbody>
 <tr>
 <td>  
-
-
 
 ```bash
 vllm serve "./output/qwen2_5-1_5b-instruct/v0-202xxxxx-xxxxxx/checkpoint-xxx-merged" --load-format "safetensors" --port 8001
@@ -321,7 +319,6 @@ wrk.body = [[
 
 Then, execute the `wrk` stress test command in the terminal. Set the concurrency level (`-c`) to 1 and 10 respectively, and set the test duration (`-d`) to 10 seconds for both cases. Run the two experiments and observe their results.
 
-
 ```bash
 wrk -t1 -c1 -d10s -s ./resources/2_9/post.lua http://localhost:8000/v1/chat/completions
 
@@ -330,8 +327,8 @@ wrk -t1 -c10 -d10s -s ./resources/2_9/post.lua http://localhost:8000/v1/chat/com
 
 The wrk stress test results are shown below:
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01ybO7TU1X6LJ12FYdV_!!6000000002874-2-tps-1452-322.png" width="500" height="150">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01bberC61txr86CpFjU_!!6000000005969-2-tps-1472-362.png" width="500" height="150">
+*(Screenshot: wrk stress-test result at concurrency 10 — QPS ≈ 20.08, about 6x higher than concurrency 1.)*
+*(Screenshot: wrk stress-test result at concurrency 1 — QPS ≈ 3.30.)*
 
 According to the stress test results, increasing concurrency from 1 to 10 improved QPS by approximately 6 times (from 3.30 to 20.08) while average latency increased by about 30% (from 324.61 to 426.84 ms). Notably, in the second test, two timeout errors occurred. This happened because, under higher concurrency, the server load exceeded its processing capacity, and limited model inference performance led to some requests timing out.
 
@@ -407,7 +404,6 @@ ECS provides stable computing resources and avoids cold-start delays common in s
 * Security groups, access control, and data encryption for enhanced security
 
 However, managing these components requires technical expertise, leading to higher operational and maintenance overhead.
-
 
 **Suitable Scenarios:**
 
@@ -530,7 +526,7 @@ Use Case Example: Rakuten’s collaboration with Tongyi LLM to build an end-side
 * The "cloud" hosts the full LLM, which performs deep reasoning and generates responses.
 * Preprocessed data is sent to the cloud, and results are returned quickly—balancing speed, efficiency, and intelligence.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01U6Jkr71Xl6dLdLVJI_!!6000000002963-2-tps-1112-237.png" width="1000">
+*(Screenshot: vLLM serving the model — "Uvicorn running" means the OpenAI-compatible model service is ready to accept inference requests.)*
 
 **Embedded System Deployment**
 

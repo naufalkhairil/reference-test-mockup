@@ -29,7 +29,6 @@ client = OpenAI(
 print(f"API Key loaded: {os.environ['DASHSCOPE_API_KEY'][:5]}*****")
 ```
 
-
 In this lesson, you'll learn how to give your Agent memory ability, solving the LLM's inherent "forgetfulness" problem. You'll start from the most naive method, gradually discover its limitations, and finally master the industry's mainstream strategies for building short-term and long-term memory.
 
 First, let's configure the environment needed for this lesson.
@@ -122,7 +121,6 @@ async def run_stateless_test():
     for m in await writing_agent.memory.get_memory():
         print(f"- [{m.role}] {m.name}: {m.content}")
 
-
 await run_stateless_test()
 ```
 
@@ -158,7 +156,15 @@ The simplest, most brute-force method is to remember only the most recent events
 -   **Boundary condition**: this is a "one-size-fits-all" amnesia scheme. If key information from early in the conversation (e.g. the core goal the user set in the first round) gets truncated, the Agent will "lose its memory" again, causing the conversation logic to break.
 -   **Performance risk**: even without exceeding the maximum window limit, only truncating when the window is nearly full means the Agent works with a near-limit long context for a long time. Because of **attention dilution**, this degrades the model's ability to handle complex tasks.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01ctJuLJ1qKWMAxCrMK_!!6000000005477-55-tps-791-240.svg" width="700">
+*Figure (translated): fixed-window truncation.*
+
+```text
+[Conversation history: rules A B C D] -> [Fixed window: keep only the most recent N entries]
+                                              │
+                                    ┌─────────┴─────────┐
+                                    v                   v
+                          [Retain: rules C D]   [Discard: rules A B]
+```
 
 In `AgentScope`, this function is implemented by the `Formatter` component. You can pass the `max_tokens` argument when initializing the `Formatter` to limit the context length.
 
@@ -202,7 +208,6 @@ async def run_truncation_test():
     print(f"[{reply.name}]: {reply.content}")
     print("\nThe Agent has very likely forgotten the earliest 'Rule A', because to satisfy the max_tokens=40 limit, it discarded the earliest conversation from the start of its memory.")
 
-
 await run_truncation_test()
 ```
 
@@ -216,7 +221,17 @@ Simple truncation directly discards information, which is clearly not ideal. A s
 -   **Applicable scenarios**: suited to tasks that need to maintain goal consistency over the long term, such as project planning, long-form content creation, etc.
 -   **Boundary condition**: it introduces additional API-call cost (for generating the summary), and the summary quality directly affects subsequent conversation.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01kwqAVt1Xf9UyK6CZq_!!6000000002950-55-tps-1119-223.svg" width="700">
+*Figure (translated): summary memory.*
+
+```text
+[Full history: conversations 1-10] -> {Check length}
+                                       | (does not exceed threshold)    | (exceeds threshold)
+                                       v                                v
+                                [Keep as is]                [LLM generates summary]
+                                                                         |
+                                                                         v
+                                                          [Compressed: summary + recent conversation]
+```
 
 `AgentScope` doesn't currently have this built in, but you can easily implement this logic by customizing a `Memory` class. Below is a **conceptual implementation approach**:
 
@@ -275,7 +290,20 @@ This "retrieve on demand" pattern is exactly the core of building an advanced me
 -   **Applicable scenarios**: this is the cornerstone of building a truly intelligent Agent capable of long-term interaction. Suited to all complex scenarios such as personalized assistants, enterprise knowledge bases, and intelligent learning companions.
 -   **Boundary condition**: the highest system complexity. It introduces new tech stacks such as an Embedding model and a vector database.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01wt5ryO1MuIpJPeXth_!!6000000001494-55-tps-1703-343.svg" width="700">
+*Figure (translated): long-term memory with a vector database.*
+
+```text
+Storage phase:    [Conversation content] -> [Convert to vector (embedding)] -> (Vector database)
+                                                                                  |
+                                                                                  v
+Retrieval phase:  [New question] -> [Convert to vector] -> [Similarity search]
+                                                              |
+                                                              v
+                                                   [Top-K relevant conversations]
+                                                              |
+                                                              v
+                                      [Combine relevant memories + new question] -> [Send to model]
+```
 
 `AgentScope` elegantly implements this function through the `Mem0LongTermMemory` module. It supports two working modes:
 
@@ -320,7 +348,6 @@ ltm_agent_static = create_agent(
     long_term_memory=long_term_memory,
     long_term_memory_mode="static_control", # key parameter: set to static-control mode
 )
-
 
 async def run_ltm_static_test():
     # Conversation 1: store a key piece of information
@@ -369,7 +396,6 @@ ltm_agent_active = create_agent(
     long_term_memory=long_term_memory,
     long_term_memory_mode="agent_control", # key parameter: set to Agent-control mode
 )
-
 
 async def run_ltm_active_test():
     # Conversation 1: the Agent autonomously decides to record information

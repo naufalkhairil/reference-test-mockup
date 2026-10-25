@@ -41,7 +41,15 @@ To let the bot get information from the internet, the most direct idea is: write
 
 Suppose you've already written a function called web_search that can look up materials via a search engine. Now, when the user makes a request, you want the model to use this function. The simplest implementation is: after receiving the request, the program "hardcodes" the execution of this function, then sends the execution result together with the original request to the LLM, and has it generate a summarizing reply.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01P40EFk1LNxElRGKtA_!!6000000001288-55-tps-1092-217.svg" width="700">
+*Figure (translated): hardcoded tool calling.*
+
+```text
+[User request] -> [Hardcoded execution: web_search] -> [Search results (text data)]
+      |                                                    |
+      └──────────────────────┬─────────────────────────────┘
+                             v
+                     [LLM (Qwen-Plus)] -> [Final response]
+```
 
 ```python
 
@@ -65,7 +73,6 @@ tool_result = web_search(query=user_request)
 
 print(f"User request: {user_request}")
 print(f"Tool result: {tool_result}\n")
-
 
 # 3. Concatenate the user request and the tool result into one prompt and send it to the LLM
 #    The goal is to have the model generate a human-friendly reply based on the structured tool output.
@@ -178,7 +185,14 @@ The next task is how to ensure the model can stably and strictly output accordin
 
 3.  **Validate and retry**: after receiving the model's output, the program must strictly validate it with the same Schema. If validation fails, the program should capture the validation error message and send it, together with the model's previous erroneous output, back to the model as correction clues, asking it to regenerate.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01LbicK41tPxucZHDsd_!!6000000005895-55-tps-1259-245.svg" width="700">
+*Figure (translated): structured output with schema validation and retry.*
+
+```text
+[User request] -> [Schema definition + prompt construction] -> [LLM generation] -> {Validate}
+                        | (fail, <2 times: retry)               | (pass)          | (timeout)
+                        └──────────────────────► (back to LLM)  v                 v
+                                                       [Structured result]     [Failure]
+```
 
 ```python
 import json
@@ -234,7 +248,6 @@ def build_prompt(user_request: str) -> str:
             "query": "latest news in the AI field"
         }}
         }}
-
 
         # User request:
         "{user_request}"
@@ -296,7 +309,16 @@ Taking the OpenAI SDK's function calling as an example:
     4. Call the API again, sending the tool execution result to the model
     5. Based on the result returned by the tool, the model generates the final user reply
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01JlDfvF1irTxlt4Wdk_!!6000000004466-55-tps-848-884.svg" width="700">
+*Figure (translated): the complete tool-calling sequence.*
+
+```text
+1. User -> LLM:   first API call (model + messages + tools)
+2. LLM -> User:   tool_calls (function_name + arguments)
+3. User -> Tool:  actual function call with arguments
+4. Tool -> User:  execution result
+5. User -> LLM:   second API call with tool results
+6. LLM -> User:   final reply (based on tool results)
+```
 
 Let's understand this flow through a complete code example:
 
@@ -364,7 +386,7 @@ final_response = client.chat.completions.create(messages=[..., tool_result])
 
 This means the LLM **observes** the tool-call result, **thinks** about whether the task is complete, then decides whether to give the final answer or continue to **act** (call more tools). This **Think-Act-Observe** loop is the **ReAct pattern**, and an Agent that works this way is called a **ReAct Agent**.
 
-Manually implementing the ReAct Agent's loop logic is fairly complex (you have to handle state management, multi-round calls, error retries, etc.). To simplify development, we'll use <a href="https://github.com/agentscope-ai/agentscope">AgentScope</a>, a production-grade Agent framework — it has already wrapped up the complete logic of the ReAct Agent and tool calling for you.
+Manually implementing the ReAct Agent's loop logic is fairly complex (you have to handle state management, multi-round calls, error retries, etc.). To simplify development, we'll use [AgentScope](https://github.com/agentscope-ai/agentscope), a production-grade Agent framework — it has already wrapped up the complete logic of the ReAct Agent and tool calling for you.
 
 > **AgentScope's core advantages:**
 >
@@ -376,7 +398,17 @@ Manually implementing the ReAct Agent's loop logic is fairly complex (you have t
 
 Let's rewrite the tool calling just now with AgentScope to feel the simplification the framework brings:
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01VwI8Ew1UEBMsHfe8S_!!6000000002485-55-tps-900-360.svg" style="width: 700px;background:white;display: block; "/>
+*Figure (translated): the ReAct loop — think, act, observe, repeat.*
+
+```text
+[User needs: find the Attention paper] -> [AI: think & judge next step] -> [AI: act, call tool search_arxiv]
+       ^                                                                               |
+       |                    (receive tool result, think again)                         v
+       └────────────────────────────────────────────────────────────── [Tool result: paper links]
+                                                                                    |
+                                                                                    v
+                                                                     [AI answers based on tool results]
+```
 
 ```python
 import asyncio
@@ -469,7 +501,20 @@ To solve this, Anthropic proposed MCP (Model Context Protocol), whose core idea 
 
 In MCP, the tool provider is called the MCP Server, responsible for declaring tools (name, description, and parameters); the tool consumer is called the MCP Client, responsible for connecting to the MCP Server and pulling the tool definitions. This way, the Agent only needs to integrate an MCP Client to dynamically discover and pull the latest capability definitions declared by the MCP Server, without hardcoding tool Schemas in its code.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01Apfjka1JUhqQ26f9u_!!6000000001032-55-tps-1580-715.svg" width="700">
+*Figure (translated): with vs. without MCP.*
+
+```text
+Without MCP (each app wraps all tools itself):
+[Agent A] -> [Search service] + [Document service] + [Data service]
+[Agent B] -> [Search service] + [Document service] + [Data service]
+[Agent C] -> [Search service] + [Document service] + [Data service]
+
+With MCP (unified tool definition):
+[Agent A] ─┐
+[Agent B] ─┼──► [MCP] ──► [Search service]
+[Agent C] ─┘              [Document service]
+                          [Data service]
+```
 
 By decoupling the definition of tools from their use, MCP solves the scaling problem of "**how tools are discovered and managed**".
 
@@ -594,15 +639,22 @@ await run_local_mcp_example()
 
 After running the Client, you'll see the Agent successfully call the `web_search` tool and return the search results.
 
-<a href="https://img.alicdn.com/imgextra/i3/O1CN018O554N1dYdaZlvHcO_!!6000000003748-0-tps-1840-848.jpg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i3/O1CN018O554N1dYdaZlvHcO_!!6000000003748-0-tps-1840-848.jpg" width="600">
-</a>
+*(Screenshot: the local MCP client connects to the MCP server, pulls the tool list (name, description, schema), and invokes the search tool.)*
 
 When the Agent starts, the MCP Client **automatically connects to the MCP Server and pulls the tool list (name, description, parameters)**. After getting the list, the subsequent flow is similar to the Function Calling in 1.2 — select the tool, generate the arguments, execute the call, return the result.
 
-<a href="https://img.alicdn.com/imgextra/i2/O1CN01VT6xmQ1bjVlF8DT7d_!!6000000003501-55-tps-2014-1623.svg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01VT6xmQ1bjVlF8DT7d_!!6000000003501-55-tps-2014-1623.svg" width="600">
-</a>
+*Figure (translated): MCP client-server interaction.*
+
+```text
+1. User -> MCP Client (Agent):  search for the latest LLM progress
+2. MCP Client -> MCP Server:    pull the tool list
+3. MCP Server -> MCP Client:    tool list + schema
+4. MCP Client:                  select a tool
+5. MCP Client -> MCP Server:    call request (tool name + arguments)
+6. MCP Server:                  validate schema + execute
+7. MCP Server -> MCP Client:    return result
+8. MCP Client -> User:          summarize + visualize the result
+```
 
 #### 5.3.2 Connect to the online MCP service: Streamable HTTP
 
@@ -700,7 +752,6 @@ Let's recap what you learned in this lesson:
 *   **The ReAct loop and development frameworks**: you recognized that tool calling is the key to implementing the **ReAct (Think-Act-Observe)** loop, and learned to use a development framework like AgentScope to free yourself from the tedium of manual implementation and focus more on business logic.
 
 ## 🔥 Quiz
-
 
 ### 🔍 Single choice 3.1.1
 <details>

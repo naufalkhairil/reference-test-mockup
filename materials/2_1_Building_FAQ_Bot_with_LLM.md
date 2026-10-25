@@ -13,7 +13,6 @@ After completing this lesson, you will be able to:
 ## ⚠️ Environment Setup
 To experience the tutorial smoothly, we recommend first completing the [**Environment Setup**](https://edu.aliyun.com/course/3130200/lesson/343310285) chapter of the **Alibaba Cloud LLM Senior Engineer ACP Certification Course**, and making sure the required environment is correctly installed.
 
-
 ## 💻 1. Calling Qwen via API
 ### 1.1 Confirm the Python environment
 The most direct way to experience an LLM is to chat with it through a web interface (such as [Qwen](https://tongyi.aliyun.com/qianwen/)). But as a developer, you often need to integrate LLM capabilities into your own application; you can use the widely-adopted OpenAI Python SDK to call the Qwen LLM. You already installed the necessary dependencies in `1.0 Compute Environment Setup`. Before running the code below, make sure you've switched to the newly created Python environment — in this example, `Python (llm_learn)`.
@@ -30,9 +29,8 @@ To call Qwen, go to Alibaba Cloud's LLM service platform Model Studio (Bailian),
 
 > Follow the steps in the image below to get your API KEY:
 >
-> <a href="https://img.alicdn.com/imgextra/i3/O1CN01hdY7Ln1Xm1QHVrfTA_!!6000000002965-2-tps-3428-1868.png" target="_blank">
-> *(Screenshot: step-by-step walkthrough in Model Studio to obtain your API key.)*
-> </a>
+> > *(Screenshot: step-by-step walkthrough in Model Studio to obtain your API key.)*
+> 
 
 ### 1.3 Configure the API Key
 
@@ -185,14 +183,23 @@ Let's take a simple input "ACP is a very" and look concretely at how the LLM pro
 
 *Figure (translated): the LLM text-generation workflow, split into five stages.*
 
-```mermaid
-flowchart LR
-    A["Input: 'ACP is a very'"] --> B["1. Tokenization<br/>text → token IDs"]
-    B --> C["2. Token vectorization<br/>token IDs → vectors"]
-    C --> D["3. LLM inference<br/>vectors → next-token logits"]
-    D --> E["4. Decoding & autoregression<br/>pick next token, append to input, repeat"]
-    E --> F["5. Output text"]
-    F -.->|"until end-of-sequence"| D
+```text
+[Input: "ACP is a very"]
+        |
+        v
+[1. Tokenization: text -> token IDs]
+        |
+        v
+[2. Token vectorization: token IDs -> vectors]
+        |
+        v
+[3. LLM inference: vectors -> next-token logits]
+        |
+        v
+[4. Decoding & autoregression: pick next token, append to input] <----+
+        |                                                            |
+        v                                                            └── repeat until end
+[5. Output text]
 ```
 
 The LLM's text-generation workflow can be divided into five stages: tokenization, token vectorization, LLM inference, decoding & autoregression, and output text:
@@ -238,11 +245,10 @@ For example, the figure below shows some candidate tokens the model predicts and
 
 *Figure (translated): autoregressive decoding — each newly generated token is appended to the input and fed back in.*
 
-```mermaid
-flowchart LR
-    In["Input: ACP is a very"] --> M["LLM"]
-    M --> Out["Next token: informative"]
-    Out -->|"append to input"| In
+```text
+[Input: ACP is a very] -> [LLM] -> [Next token: informative]
+       ^                              |
+       └────────── append ────────────┘
 ```
 
 Once the next token is chosen (say the model picks "informative"), this newly generated token is appended to the end of the original input sequence, forming the new input "ACP is a very informative." Then, based on this new sequence, the model repeats stages 3 and 4 to continue predicting the next token. This "word-chain" process is called **autoregressive generation**.
@@ -251,7 +257,6 @@ The model's autoregressive loop continues until a **stop condition** is met:
 - A special **End-of-Sequence (EOS) token** is generated.
 - The preset maximum generation length is reached.
 - A user-specified stop-word sequence is generated.
-
 
 Different model families use different EOS tokens.
 <table>
@@ -263,8 +268,6 @@ Different model families use different EOS tokens.
 <tr><td>Pad Token</td><td><|endoftext|></td></tr>
 <tr><td>Qwen3</td><td><|im_end|></td></tr>
 </table>
-
-
 
 **Stage 5: Output text**
 
@@ -356,12 +359,10 @@ In the figure, the blue part represents tokens whose cumulative probability reac
 
 When top_p=0.5, the model prefers the highest-probability token, "RAG"; when top_p=0.8, the model randomly picks one of the three tokens "RAG", "prompt", "model" to generate.
 
-
 From this, the effect of top_p on generation can be summarized as:
 - Larger value: broader candidate range, more diverse content — suitable for creative writing, poetry generation, etc.
 - Smaller value: narrower candidate range, more stable output — suitable for scenarios needing clear answers like news drafts and code generation.
 - Extremely small value (e.g. 0.0001): in theory the model only picks the highest-probability token, giving very stable output. But in practice, subtle randomness from factors like distributed systems and post-processing of model output still means identical output every time isn't guaranteed.
-
 
 Below, experience top_p's effect. By adjusting the top_p value, ask the same question 10 times and observe the fluctuation in the answers.
 
@@ -448,17 +449,12 @@ However, when you try to "feed" more company documents this way (e.g. a dozens-o
 <td style="width: 30%; border: none;">
   *Figure (translated): the RAG indexing pipeline.*
 
-```mermaid
-flowchart LR
-    Docs["Documents"] --> Chunk["Chunking (split into segments)"]
-    Chunk --> Embed["Embedding model (text → vectors)"]
-    Embed --> Store[("Vector database")]
+```text
+[Documents] -> [Chunking (split into segments)] -> [Embedding model (text -> vectors)] -> (Vector database)
 ```
 </td>
 </tr>
 </table>
-
-
 
 ### 3.3 The solution: Context Engineering
 
@@ -493,25 +489,21 @@ So what techniques does context engineering include? You can quickly get the cor
   <td style="width: 30%; vertical-align: top; border: none;">
     *Figure (translated): the RAG retrieval-and-generation pipeline.*
 
-```mermaid
-flowchart LR
-    Q["User question"] --> E["Embedding model"]
-    E --> S["Similarity search in vector DB"]
-    S --> K["Top-k relevant chunks"]
-    K --> P["Prompt template: question + chunks"]
-    P --> M["LLM generates the answer"]
+```text
+[User question] -> [Embedding model] -> [Similarity search in vector DB] <- (Vector database)
+                                          |
+                                          v
+                        [Top-k relevant chunks] -> [Prompt template] -> [LLM] -> [Answer]
 ```
   </td>
 </tr>
 </table>
-
 
 You may have noticed some new terms here. Don't worry — you don't need to master every detail right away. The purpose of this diagram is to build an overall understanding: **the few topics you'll learn next are all part of context engineering**.
 
 To make it easier to absorb, in later lessons these concepts will be broken down and practiced one by one as independent topics.
 
 For now, focus on the most pressing problem — how to solve private-knowledge Q&A. In this technical map, **RAG** is the most direct and effective solution. Next, you'll learn it in depth.
-
 
 ### 3.4 The technical solution: RAG (Retrieval-Augmented Generation)
 
@@ -548,7 +540,6 @@ In this lesson, we learned:
 Besides the task demonstrated in this lesson, you can have the LLM do many more kinds of tasks, such as content generation, structured information extraction, text classification, sentiment analysis, etc. And introducing a RAG solution into your LLM application can expand the range of knowledge the LLM can handle.
 
 In the next subsection, we'll get hands-on and learn how to create a complete RAG application.
-
 
 ### Further reading
 - While studying this course, if you want to understand more related concepts and principles, you can ask the LLM to expand further or give study suggestions:
@@ -655,7 +646,6 @@ temperature controls the "sharpness" of the softmax output distribution. Lowerin
 **【Click to see the answer】**
 </summary>
 
-
 <div style="margin-top: 10px;  padding: 15px;  border: 1px solid #dee2e6; border-radius: 0 0 6px 6px;">
 
 #### 🎯 Scenario A solution
@@ -678,15 +668,12 @@ temperature = 0.5~0.7  # reduce randomness
 top_p = 0.7~0.8        # focus on high-probability words
 ```
 
-
 > 🌟 **Tuning tip**
 > Adjust by ±0.2 each time, and observe changes via A/B testing.
 > If you need to balance Scenario A and Scenario B, a recommended combo is: `temperature=0.6` + `top_p=0.8`
 
 </div>
 </details>
-
-
 
 ### 🔍 Single choice 2.1.3
 <details>

@@ -137,72 +137,42 @@ For simple use cases, you can either select smaller models directly (such as Qwe
 
 Remove redundant weights or layers from the model to reduce complexity, in two steps: first delete low-importance connections, then delete neurons left with no connections.
 
-```mermaid
-flowchart LR
-    subgraph PRE["Pre-pruning (dense network)"]
-        direction TB
-        p1["Layer 1 (input): 5 neurons"] --> p2["Layer 2: 4 neurons"]
-        p2 --> p3["Layer 3: 4 neurons"]
-        p3 --> p4["Layer 4: 3 neurons"]
-        p4 --> p5["Layer 5 (output): 2 neurons"]
-    end
-
-    subgraph STEPS["Pruning"]
-        direction TB
-        s1["1. Remove Synapses: delete low-importance connections"] --> s2["2. Remove Neurons: delete neurons with no remaining connections"]
-    end
-
-    subgraph POST["Post-pruning (sparse network)"]
-        direction TB
-        q1["Layer 1: 5 neurons"] --> q2["Layer 2: 3 neurons"]
-        q2 --> q3["Layer 3: 3 neurons"]
-        q3 --> q4["Layer 4: 2 neurons"]
-        q4 --> q5["Layer 5 (output): 2 neurons"]
-    end
-
-    PRE --> STEPS --> POST
+```text
+Pre-pruning (dense):  [L1: 5] -> [L2: 4] -> [L3: 4] -> [L4: 3] -> [L5: 2]
+                        |
+                        |  Step 1: Remove Synapses (delete low-importance connections)
+                        |  Step 2: Remove Neurons (delete neurons with no connections left)
+                        v
+Post-pruning (sparse): [L1: 5] -> [L2: 3] -> [L3: 3] -> [L4: 2] -> [L5: 2]
 ```
 ##### Quantization
 
 Use INT4/INT8/FP16 quantization to map continuous FP32 values onto a small set of discrete levels, reducing the computational resources needed for inference.
 
-```mermaid
-flowchart TB
-    subgraph FP32["FP32 - continuous values (9 sampled points on a distribution)"]
-        direction LR
-        x1(("v1")) --- x2(("v2")) --- x3(("v3")) --- x4(("v4")) --- x5(("v5")) --- x6(("v6")) --- x7(("v7")) --- x8(("v8")) --- x9(("v9"))
-    end
-    FP32 -->|"Quantization: map each value to its nearest discrete level"| INT4
-    subgraph INT4["INT4 - discrete levels (10 bins, 5 levels occupied)"]
-        direction LR
-        q1["q1"] --- q2["q2"] --- q3["q3"] --- q4["q4"] --- q5["q5"]
-    end
+```text
+FP32 (continuous values)                    INT4 (discrete bins)
+  o---o---o---o---o---o---o---o---o         (9 sampled values on a distribution)
+  |
+  |  Quantization: map each value to its nearest discrete level
+  v
+[ q1 ]--[ q2 ]--[ q3 ]--[ q4 ]--[ q5 ]--( )--( )--( )--( )--( )
+  5 occupied levels out of 10 bins
 ```
 ##### Knowledge Distillation
 
 Train a small "student" model to imitate a large "teacher" model: the teacher's distilled knowledge is transferred to the student, and both are trained on the same data.
 
-```mermaid
-flowchart LR
-    D[("Data")] --> T
-    D --> S
-
-    subgraph T["Teacher Model (large)"]
-        direction TB
-        ti["Input layer: 5 neurons"] --> th1["Hidden layer 1: 4 neurons"] --> th2["Hidden layer 2: 3 neurons"] --> to["Output layer: 2 neurons"]
-    end
-
-    subgraph KT["Knowledge Transfer"]
-        K["Knowledge"]
-    end
-
-    subgraph S["Student Model (small)"]
-        direction TB
-        si["Input layer: 2 neurons"] --> sh1["Hidden layer: 3 neurons"] --> so["Output layer: 2 neurons"]
-    end
-
-    T -->|"Distill"| K
-    K -->|"Transfer"| S
+```text
+                       ┌─────────────────────────┐
+        ┌─────────────►│  Teacher Model (large)  │─────────────┐
+        │              │  [In 5] -> [H1 4] -> [H2 3] -> [Out 2]  │   Distill  │
+     [Data]            └─────────────────────────┘             v
+        │                                                 [Knowledge]
+        │                                                      │  Transfer
+        │              ┌─────────────────────────┐             v
+        └─────────────►│  Student Model (small)  │◄────────────┘
+                       │  [In 2] -> [H1 3] -> [Out 2] │
+                       └─────────────────────────┘
 ```
 
 > **Image Source**: [Knowledge Distillation: A Survey](https://arxiv.org/pdf/2006.05525)
@@ -281,9 +251,6 @@ While LLMs are powerful and versatile, they are not suitable for every task. Def
 - **Traditional Optimization Techniques**: Combine classical algorithms to improve efficiency. Classic optimization techniques remain applicable even within LLM applications.
   - **Binary Search**: Use binary search to quickly locate targets in ordered data rather than having the LLM traverse entire datasets.
   - **Hash Maps**: Use hash tables to quickly retrieve predefined responses or templates, reducing computational complexity.
-
-
-
 
 ### 2.2 User-Perceived optimization
 

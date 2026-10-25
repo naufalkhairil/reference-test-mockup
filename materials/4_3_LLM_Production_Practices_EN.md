@@ -41,9 +41,19 @@ Different business scenarios call for different things from a model. Here are so
 
 Once you've settled on a task scenario, you may find there are many large models with similar capabilities to choose from (like Qwen, DeepSeek, GPT). Inference **accuracy** is likely to be the main factor driving your choice of model, so you'll need to **build your own evaluation dataset**, or **choose a public dataset that matches your business scenario**, to run the evaluation (like MMLU for language understanding, or BBH for testing complex reasoning).
 
-<a href="https://img.alicdn.com/imgextra/i2/O1CN01YFnJL820aE1wiLRgS_!!6000000006865-0-tps-2832-1118.jpg" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01YFnJL820aE1wiLRgS_!!6000000006865-0-tps-2832-1118.jpg" width="900">
-</a>
+**Model benchmark leaderboard** (reconstructed from the screenshot; rows not visible in the screenshot are omitted):
+
+| Rank | Model | Average | IFEval | BBH | MATH | GPQA | MUSR | MMLU |
+|-----:|-------|--------:|-------:|-----:|-----:|-----:|-----:|-----:|
+| 1 | MaziyarPanahi/calme-3.2-instruct-78b | 52.08% | 80.63% | 62.61% | 40.33% | 20.36% | 38.53% | 70.03% |
+| 2 | MaziyarPanahi/calme-3.1-instruct-78b | — | — | — | — | — | — | — |
+| 3 | dfurman/CalmeRys-78B-Orpo-v0.1 | — | 81.63% | 61.92% | — | — | — | — |
+| 5 | huihui-ai/Qwen2.5-72B-Instruct-abliterated | — | 85.93% | 60.49% | 60.12% | 19.35% | — | — |
+| 8 | newsbang/Homer-v1.0-Qwen2.5-72B | — | — | 62.27% | 49.02% | 22.15% | 17.90% | — |
+| 10 | Saxo/Linkbricks-Horizon-Al-Avengers-V1-32B | — | — | — | 60.27% | 14.99% | 18.16% | 53.25% |
+| 11 | MaziyarPanahi/calme-2.2-qwen2.5-72b | — | — | — | — | — | — | — |
+
+*The full, live leaderboard is available at the Open LLM Leaderboard link above.*
 
 Image source: [Open LLM Leaderboard](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard#/) (requires access outside mainland China)
 
@@ -79,7 +89,7 @@ For simple business scenarios, you can just choose a model with fewer parameters
 
 | Model pruning | Quantization | Knowledge distillation |
 |--------|-----|---------|
-| <img src="https://img.alicdn.com/imgextra/i2/O1CN01qWEBtx1gif0bta4YW_!!6000000004176-0-tps-1448-784.jpg" width="308"> | <img src="https://img.alicdn.com/imgextra/i1/O1CN01C4UG8o1Y18RZPZXFJ_!!6000000002998-2-tps-680-486.png" width="234"> | <img src="https://img.alicdn.com/imgextra/i2/O1CN018yxBtQ1FtCUwbMrY6_!!6000000000544-0-tps-1969-807.jpg" width="310"> <br> Image source: [Knowledge Distillation: A Survey](https://arxiv.org/pdf/2006.05525)|
+| **Pruning:** remove low-importance synapses first, then remove neurons with no connections left — a sparse network. | **Quantization:** map continuous FP32 values onto discrete INT4 bins (5 occupied levels out of 10). | **Knowledge distillation:** Teacher model → distilled Knowledge → Student model (both trained on the same data). <br> Image source: [Knowledge Distillation: A Survey](https://arxiv.org/pdf/2006.05525)|
 
 Earlier lessons discussed how to get high-quality inference out of smaller models too, including:
 * Optimizing the prompt: you can expand the prompt to give more detailed instructions, or add more examples to guide the model toward better reasoning.
@@ -152,7 +162,7 @@ Beyond the performance-improvement principles above, you can further improve use
 
 A technique that returns generated content to the user progressively, reducing perceived latency and improving the fluidity of the interaction, which can significantly improve the user experience — especially in scenarios with high real-time requirements (like online customer service or voice assistants). If your application architecture uses a load balancer, you may need to disable caching and data compression to avoid breaking streaming output.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01xHhaED1FT5vHNVzEi_!!6000000000487-1-tps-954-720.gif" width="500">
+*(Demo GIF: streaming output — generated tokens appear progressively instead of all at once.)*
 
 #### 2.2.2 Chunked Processing
 
@@ -300,25 +310,19 @@ Once integrated, you can go to the [LLM Application Monitoring](https://arms.con
 * **Cost**: on the **Token Analysis** tab, you can view a ranking of token consumption by model, session, or user, quickly pinpointing which conversations are burning through the budget. If a cost spike looks abnormal, use the methods from **2.1.3** to target the optimization.
 
 <div style="text-align: center;">
-    <a href="https://img.alicdn.com/imgextra/i1/O1CN01LRNumA1UEBMOmu0l3_!!6000000002485-2-tps-7276-3064.png" target="_blank">
-    <img src="https://img.alicdn.com/imgextra/i1/O1CN01LRNumA1UEBMOmu0l3_!!6000000002485-2-tps-7276-3064.png" style="width: 700px;background:white;display: block; margin-left: auto; margin-right: auto"/>
-    </a>
+    *(Screenshot: the Trace Analysis tab for narrowing a time range down to the abnormal period and inspecting performance.)*
 </div>
 
 * **Performance**: on the **Trace Analysis** tab, you can narrow the time range down to the abnormal period, then sort by duration from highest to lowest, to find the calls with "slow replies." Opening the details for one shows you how much time each stage of the call took — retrieval, reranking, model inference — and their relative share, helping you pinpoint exactly which stage the bottleneck is in.
 
 <div style="text-align: center;">
-    <a href="https://img.alicdn.com/imgextra/i1/O1CN01kjT20j286vieuf4Vq_!!6000000007884-2-tps-2670-1518.png" target="_blank">
-    <img src="https://img.alicdn.com/imgextra/i1/O1CN01kjT20j286vieuf4Vq_!!6000000007884-2-tps-2670-1518.png" style="width: 700px;background:white;display: block; margin-left: auto; margin-right: auto"/>
-    </a>
+    *(Screenshot: reviewing quality and safety issues — e.g. whether a question touches on sensitive content.)*
 </div>
 
 * **Quality and safety**: something like "does this question touch on sensitive content" is a business judgment call, so you need to define the rules yourself first (this can be a keyword blocklist, or Alibaba Cloud's AI Guardrail — covered in the next chapter), and then [manually report the judgment result to ARMS](https://help.aliyun.com/zh/arms/application-monitoring/developer-reference/llm-trace-field-definition-description). Once reported, you can filter for every question that triggered your rules on the **Trace Analysis** tab, making compliance review easier.
 
 <div style="text-align: center;">
-    <a href="https://img.alicdn.com/imgextra/i1/O1CN01VFGLsU1bUr5b9Jl3C_!!6000000003469-2-tps-2850-1692.png" target="_blank">
-    <img src="https://img.alicdn.com/imgextra/i1/O1CN01VFGLsU1bUr5b9Jl3C_!!6000000003469-2-tps-2850-1692.png" style="width: 700px;background:white;display: block; margin-left: auto; margin-right: auto"/>
-    </a>
+    *(Screenshot: configuring alerts so you are notified automatically when a known problem recurs.)*
 </div>
 
 Finally, if you'd like to be notified automatically whenever one of these problems comes up again, see [Application Observability - Alert Management](https://help.aliyun.com/zh/cms/cloudmonitor-2-0/application-monitoring-alert-management) to set up alert rules.

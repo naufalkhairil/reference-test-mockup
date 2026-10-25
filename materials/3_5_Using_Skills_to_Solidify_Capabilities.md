@@ -30,7 +30,6 @@ client = OpenAI(
 print(f"API Key loaded: {os.environ['DASHSCOPE_API_KEY'][:5]}*****")
 ```
 
-
 Let's recap the path you've walked: you first equipped the Agent with monolithic capabilities like tool calling, reflection, and memory, using these to let it handle multi-step tasks and then cope with more complex scenarios. At this point, the Agent is already quite complete at the **capability** level.
 
 You've probably tried having AI review code, revise articles, or check documents for you — it does give feedback, but it always feels like scratching an itch through a boot: the issues it raises are either too generic ("suggest adding comments") or miss the point (missing the real bug while fussing over naming style). The problem isn't that the Agent's capability is insufficient, but that it doesn't know **what your standard is**.
@@ -53,7 +52,6 @@ from agentscope.message import Msg, TextBlock
 from agentscope.model import DashScopeChatModel
 from agentscope.tool import Toolkit, ToolResponse
 
-
 async def read_file(file_path: str) -> ToolResponse:
     """Read the content of the file at the given path.
 
@@ -66,7 +64,6 @@ async def read_file(file_path: str) -> ToolResponse:
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
     return ToolResponse(content=[TextBlock(type="text", text=content)])
-
 
 async def main():
     toolkit = Toolkit()
@@ -580,7 +577,7 @@ The Agent doesn't need to load all content up front; instead, based on the curre
 
 The figure below shows the four-step evolution from "one-off Prompt" to "reusable knowledge base":
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN0154sCfo1rxjukimf4I_!!6000000005698-2-tps-2752-1536.png" width="700">
+*(Figure: structured status feedback — tools output structured results such as JSON (e.g. {"status": "failed"}) so the agent can decide the next step precisely.)*
 
 Let's review the changes these four steps brought:
 
@@ -677,7 +674,14 @@ This design brings three benefits:
 >
 > **Skill is "select-expand."** When the Agent starts, the descriptions of all available Skills (similar to tool descriptions) are fully presented to it. The Agent judges, based on the current task, whether it needs and which Skill it needs. Only after choosing to activate a Skill does it read its detailed content — and progressively, reading the corresponding sub-file only when it reaches that step.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01iL3ewF2AH7lGOMoCb_!!6000000008177-2-tps-2752-1536.png" width="700">
+*Figure (translated): the structure of a Skill.*
+
+```text
+[SKILL.md]
+   ├─ Frontmatter (name / description): decides "whether to use it"
+   ├─ Markdown body (workflow / rules / templates): decides "how to do it"
+   └─ External resource files: loaded on demand (scripts, checklists, references)
+```
 
 ### 3.2 The structure of a Skill
 
@@ -725,7 +729,7 @@ The problem with the first version is: what does "handle course-related tasks" m
 
 The figure below shows the complete structure of SKILL.md — the YAML frontmatter solves "whether to use it," the Markdown body solves "how to do it," and external resource files load on demand:
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN019XlCfw1Zb9JRjSU2z_!!6000000003212-2-tps-1982-1106.png" width="700">
+*(Figure: the agent first reads a Skill's description, then reads its detailed content, and only loads each sub-file when execution reaches that step.)*
 
 **Why do we need external resource files?**
 
@@ -765,7 +769,11 @@ Knowing a Skill's structure is one thing; writing a truly usable Skill is anothe
 
 Writing a good Skill essentially means going through five steps: judge whether it's worth doing → extract what to write → write good instructions → configure good tools → validate and iterate. Each step solves a different problem, and skipping any step plants a landmine down the line.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01qPi8Zp1z3Q8a4Fjsb_!!6000000006658-2-tps-2752-1536.png" width="700">
+*Figure (translated): the Skill development flow — each step solves a different problem.*
+
+```text
+[1. Judge whether it is worth doing] -> [2. Design the workflow] -> [3. Write AI-friendly scripts] -> [4. Validate and iterate]
+```
 
 #### Step 1: judge whether it's worth doing
 
@@ -1042,13 +1050,17 @@ Before making any changes:
 
 The core difference from the feedback loop: **errors are intercepted before execution**, rather than discovered after.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01AGkMrt1xme0wPx8rA_!!6000000006486-2-tps-2752-1536.png" width="700">
+*(Figure: AI-friendly scripts — unlike the feedback loop, errors are intercepted before execution rather than discovered after.)*
 
 **Write AI-friendly scripts**
 
 The workflow is designed; how should the script itself be written? The core idea: **don't kick the problem back to the model**. When a tool returns a vague error message, the model can only guess the cause; when a tool returns a structured diagnostic result, the model can precisely decide the next step. Four key principles:
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01dj50t31SguyP3egUW_!!6000000002277-2-tps-2752-1536.png" width="700">
+*Figure (translated): four-step evolution from a one-off prompt to a reusable knowledge base.*
+
+```text
+[One-off Prompt] -> [Fixed template] -> [Script/checklist] -> [Knowledge-base directory (reusable Skill)]
+```
 
 **Structured status feedback** — output JSON rather than free text. The Agent receiving `"status": "failed"` can immediately enter the fix flow; receiving "check complete, some problems found" still needs to first understand what that sentence means.
 
@@ -1150,7 +1162,15 @@ The Skill is written; how do you know if it's good? Reading it through yourself 
 
 **The development flow has three stages**:
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01I8N8vP29IfUyAuQgH_!!6000000008045-2-tps-2202-1229.png" width="700">
+*Figure (translated): Skill development flow with two agents and three stages.*
+
+```text
+[Agent A (Developer): writes the Skill's instructions] ──► [Agent B (User): tests the Skill in real tasks]
+
+Stage 1: establish an evaluation baseline (Agent A completes a real task without any Skill)
+Stage 2: Agent A develops the Skill, Agent B tests and measures the improvement
+Stage 3: iterate until the Skill passes the quality bar
+```
 
 **Stage 1: establish an evaluation baseline.** First use Agent A to complete a real task (without any Skill). Record where it made mistakes and where you had to repeatedly correct it, and pick the 3 most typical failure scenarios as evaluation cases. **Have the evaluation first, then write the Skill** — otherwise all subsequent optimization relies on "feeling."
 
@@ -1250,7 +1270,7 @@ print(response.get_text_content())
 
 This time the Agent won't give a perfunctory conclusion like "overall not bad, suggest publishing." It will first read `SKILL.md` via `read_file` to get the workflow framework, then execute item by item — reading `code-quality.md` when checking code, `content-accuracy.md` when verifying accuracy, `style-guide.md` when proofreading style, and finally generating a structured report per the output-format template.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01asbLYF1r7z9uHXdfu_!!6000000005585-2-tps-2752-1536.png" width="700">
+*(Figure: three design decisions — inject only the Skill's description rather than its full text (context window is a scarce resource), load sub-files on demand, and rely on structured outputs.)*
 
 **Three design decisions**
 
@@ -1414,7 +1434,7 @@ The fundamental reason these patch solutions fail is: a Skill isn't an ordinary 
 
 From another angle, the true value of a Skill is as a **capability amplifier**: a senior instructional designer can only review 10 courses a week, but after she encapsulates her review experience into a Skill, the 10 junior members on the team can all invoke it — her professional ability is replicated at scale. But to make this amplifier run stably in a team, you need to solve three problems: ownership, collaboration process, and quality assurance.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01rWGqyT1g0h50yV1wi_!!6000000004080-2-tps-2752-1536.png" width="700">
+*(Figure: domain-team ownership — those who understand the business best define and maintain the Skill.)*
 
 ### 5.3 Domain-team ownership: let those who understand the business best manage the Skill
 
@@ -1481,7 +1501,13 @@ After ownership is clear, the next question is: how does the team collaborativel
 
 **The Skills-as-Code lifecycle**
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01twQul21UrZPtUMGtU_!!6000000002571-2-tps-2752-1536.png" width="700">
+*Figure (translated): the Skills-as-Code lifecycle.*
+
+```text
+[1. Local iteration: maintainer edits and validates on a few representative cases]
+        -> [2. Code review + CI/CD: automated checks in the pipeline]
+        -> [3. Release: publish the new version for the team]
+```
 
 1. **Local iteration**: the maintainer modifies the Skill locally and quickly validates the effect with a few representative cases
 2. **PR / Review**: submit a Pull Request, and other team members (especially business experts) review the change

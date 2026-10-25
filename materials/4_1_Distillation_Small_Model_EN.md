@@ -390,11 +390,16 @@ The teacher model isn't 100% perfect. Even a strong model like qwen3.6-plus will
 Here are the three most common types of problems seen in real production:
 
 <div style="text-align: center;">
-    <a href="https://img.alicdn.com/imgextra/i1/O1CN015UiGvh1PSltalxuVv_!!6000000001840-55-tps-720-850.svg" target="_blank">
-    <img src="https://img.alicdn.com/imgextra/i1/O1CN015UiGvh1PSltalxuVv_!!6000000001840-55-tps-720-850.svg" style="width: 600px;background:white;display: block; margin-left: auto; margin-right: auto"/>
-    </a>
-</div>
+    *Figure (translated): quality filtering catches three common problems and discards bad records.*
 
+```text
+Standard format: {"intents": [...], "department": "...", "urgency": "...", "entities": {...}, "route": "rag_query"}
+
+Error 1: incomplete JSON     -> missing closing brace, json.loads() raises  -> discard
+Error 2: required field missing -> entities / route omitted, JSON valid but schema mismatch -> discard
+Error 3: value out of range  -> e.g. intents = ["unknown intent"]           -> discard
+```
+</div>
 
 The filtering uses "outcome validation" (checking whether the output matches the schema) rather than "process validation" (checking whether the reasoning process makes sense) — for a structured-extraction task, this approach is simple and effective. Below, we implement the same filtering logic two ways: with Qwen Code and with Python code.
 
@@ -612,7 +617,6 @@ def compute_intent_f1(pred_intents, true_intents):
         return 0.0
     return 2 * precision * recall / (precision + recall)
 
-
 def evaluate_predictions(predictions, ground_truths):
     """
     Evaluate structured-extraction results, returning a dict of raw values:
@@ -648,7 +652,6 @@ def evaluate_predictions(predictions, ground_truths):
         "total": n
     }
 
-
 def print_eval_results(results, model_name):
     """Print evaluation results in a formatted way"""
     r = results
@@ -657,7 +660,6 @@ def print_eval_results(results, model_name):
     print(f"  JSON compliance rate: {r['json_valid']}/{n} ({r['json_valid']/n*100:.0f}%)")
     print(f"  intents F1: {r['intent_f1']*100:.1f}%")
     print(f"  route accuracy: {r['route_accuracy']}/{n} ({r['route_accuracy']/n*100:.0f}%)")
-
 
 def render_comparison_table(results_list, model_names):
     """Render multiple sets of evaluation results as a Markdown comparison table"""
@@ -677,7 +679,6 @@ def render_comparison_table(results_list, model_names):
                 cells.append(f"{r['route_accuracy']}/{n} ({r['route_accuracy']/n*100:.0f}%)")
         rows.append(f"| {label} | " + " | ".join(cells) + " |")
     display(Markdown("\n".join([header, sep] + rows)))
-
 
 def predict_batch(model_name, test_data, system_prompt=SYSTEM_PROMPT):
     """Batch-predict on the test set with the given model"""
@@ -835,7 +836,7 @@ Before starting training, let's first understand how a model learns from trainin
 At the core of model training is an iterative optimization process: given an input, the model produces a prediction; the prediction is compared against the expected output to compute a **loss**; the model's parameters are then adjusted to make the loss smaller. The loss function quantifies "how far the prediction is from what's expected" — the smaller the loss, the closer the model's output is to the expected output in the training data.
 
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i4/O1CN0149XTTS1WUKSTtpeoh_!!6000000002791-2-tps-2314-1682.png" style="width: 400px; display: block; margin-left: auto; margin-right: auto"/>
+*(Figure: the loss curve — the closer the loss is to zero, the closer the model's output is to the expected output in the training data.)*
 </div>
 
 #### Gradient Descent
@@ -843,7 +844,7 @@ At the core of model training is an iterative optimization process: given an inp
 How do you find the parameters that minimize the loss? Gradient descent starts from a random point, and at each step, adjusts the parameters in the direction where the loss decreases fastest, gradually converging toward the optimum.
 
 <div style="text-align: center">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01ihhR9Y1IbkFZTQ3bV_!!6000000000912-1-tps-1080-810.gif" style="width: 400px;margin-left: auto; margin-right: auto"/>
+*(Figure: gradient descent starts from random parameters and moves in the direction where the loss decreases fastest, gradually converging toward the optimum.)*
 </div>
 
 How much the parameters move at each step is determined by the **learning rate**. Too large a learning rate, and the parameters bounce back and forth around the optimum without ever converging; too small, and convergence is slow and training takes far too long; the right learning rate lets you steadily approach the optimum.
@@ -852,17 +853,17 @@ How much the parameters move at each step is determined by the **learning rate**
     <!-- Column 1 -->
     <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px">
         <p style="margin-top: 10px">A well-chosen learning rate lets you find good parameters in a relatively short amount of time.</p>
-        <img src="https://img.alicdn.com/imgextra/i3/O1CN01NrvVfj1sCqtKHLyia_!!6000000005731-2-tps-1680-1224.png" style="width: 100%; height: auto; border-radius: 3px"/>
+        *(Figure: a well-chosen learning rate finds good parameters in a relatively short time.)*
     </div>
     <!-- Column 2 -->
     <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px">
         <p style="margin-bottom: 10px">A learning rate that's too low can still find good parameters, but at the cost of much more time and resources.</p>
-        <img src="https://img.alicdn.com/imgextra/i1/O1CN015dbcz61MCn8LkN2Ta_!!6000000001399-2-tps-1728-1300.png" style="width: 100%; height: auto; border-radius: 3px"/>
+        *(Figure: a learning rate that's too low can still find good parameters, but costs much more time and resources.)*
     </div>
     <!-- Column 3 -->
     <div style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px">
         <p style="margin-bottom: 10px">A learning rate that's too high can cause you to overshoot the optimum entirely, and you may never find the lowest point.</p>
-        <img src="https://img.alicdn.com/imgextra/i1/O1CN01l4leTB1LKI0BcVs16_!!6000000001280-2-tps-1658-1262.png" style="width: 100%; height: auto; border-radius: 3px"/>
+        *(Figure: a learning rate that's too high overshoots the optimum entirely and may never find the lowest point.)*
     </div>
 </div>
 
@@ -873,9 +874,14 @@ Full-parameter fine-tuning requires updating every weight in the model, and larg
 The core idea behind LoRA: instead of directly modifying the original weight matrix, "attach" a pair of small low-rank matrices alongside it to learn the delta.
 
 <div style="text-align: center;">
-<a href="https://img.alicdn.com/imgextra/i2/O1CN014UROTc25B6NgTnWtZ_!!6000000007487-2-tps-3734-1286.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN014UROTc25B6NgTnWtZ_!!6000000007487-2-tps-3734-1286.png" style="width: 700px;background:white;display: block; margin-left: auto; margin-right: auto"/>
-</a>
+*Figure (translated): LoRA decomposes the weight update into a low-rank product.*
+
+```text
+Original weight matrix:  W  (d x d)
+LoRA:                    W = W0 + ΔW
+                         ΔW = B · A     (A: r x d, B: d x r, rank r << d)
+                         only A and B are trained; W0 stays frozen
+```
 </div>
 
 Suppose the original weight matrix is $W$ (dimension $d \times d$). LoRA decomposes the delta $\Delta W$ into the product of two small matrices: $\Delta W = A \times B$, where $A$ has dimension $d \times r$ and $B$ has dimension $r \times d$, with $r$ much smaller than $d$.
@@ -900,11 +906,16 @@ While training, you need to watch two key metrics to judge the state of training
 The environment dependencies and base model were already installed and downloaded in Section 0. The full training process has four steps:
 
 <div style="text-align: center;">
-    <a href="https://img.alicdn.com/imgextra/i3/O1CN01QAtM1U1I691CAEFqF_!!6000000000843-55-tps-1100-220.svg" target="_blank">
-    <img src="https://img.alicdn.com/imgextra/i3/O1CN01QAtM1U1I691CAEFqF_!!6000000000843-55-tps-1100-220.svg" style="width: 700px;background:white;display: block; margin-left: auto; margin-right: auto"/>
-    </a>
-</div>
+    *Figure (translated): the four-step LoRA fine-tuning workflow.*
 
+```text
+Step 1: Prepare data        -> train.jsonl accessible, auto-split 10% validation set        (~1 min)
+Step 2: Start training      -> swift sft --model /model --lora_rank 8 --learning_rate 5e-5
+                               --num_train_epochs 5                                          (A10 GPU ~10 min)
+Step 3: Monitor loss        -> watch training / validation loss curves; rising validation loss = overfitting
+Step 4: Check results       -> loss curves (images/), TensorBoard (runs/), checkpoint; merge for deployment
+```
+</div>
 
 | Step | Description |
 | --- | --- |

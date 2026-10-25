@@ -45,8 +45,7 @@ Please open a Terminal window in the specified directory.
 
 Open a new terminal window inside this course's directory, i.e. **/mnt/workspace/aliyun_acp_learning/大模型ACP认证教程/C4_交付上线**.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01bfWb5l1RenX78y3M0_!!6000000002137-2-tps-1690-1476.png" width="400">
-
+*(Screenshot: terminal window opened inside the course deployment directory.)*
 
 You can type `pwd` in the terminal window to check its current directory. You can switch the terminal window to this course's directory by running the following command.
 
@@ -112,7 +111,7 @@ fi
 
 Once the download succeeds, the model files will be saved under `/mnt/workspace/model/Qwen3-0.6B`. If you already downloaded the base model in section 4.1, this step will just reuse the existing files.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01OV4ZYR1s01ut9iy4Y_!!6000000005703-2-tps-738-170.png" width="400">
+*(Screenshot: terminal output after downloading the model into `./model/Qwen3-0.6B`.)*
 
 Next, install the GPU dependencies — run the following commands in the terminal window to install `requirements-gpu.txt` from the course root directory. Do not run this step on a CPU instance.
 
@@ -288,7 +287,6 @@ To evaluate the deployed model service's performance, we'll use a simple HTTP lo
 
 First, open a new terminal window and switch to the directory specified in environment setup 2.1.
 
-
 <style>
     table {
       width: 80%;
@@ -336,7 +334,6 @@ Install the dependency package for the wrk load-testing tool.
 <tr>
 <td>
 
-
 ```bash
 sudo apt update
 sudo apt install wrk
@@ -345,7 +342,6 @@ sudo apt install wrk
 </tr>
 </tbody>
 </table>
-
 
 Next, prepare the POST request body. The data is already provided in the file ./resources/4_2/post.lua, with the following content.
 
@@ -372,7 +368,6 @@ wrk.body = [[
 </tbody>
 </table>
 
-
 Then, run the wrk load-test commands in the terminal window, setting the concurrency (-c) for the chat endpoint to 1 and 10 respectively, with the test duration (-d) set to 10s for both, and observe the results of the two experiments.
 
 <table width="90%">
@@ -390,12 +385,10 @@ wrk -t1 -c10 -d10s -s ../course_core/resources/4_2/post.lua http://localhost:800
 </tbody>
 </table>
 
-
 The wrk load-test results look like this:
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01ybO7TU1X6LJ12FYdV_!!6000000002874-2-tps-1452-322.png" width="500" height="150">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01bberC61txr86CpFjU_!!6000000005969-2-tps-1472-362.png" width="500" height="150">
-
+*(Screenshot: wrk stress-test result at concurrency 10 — QPS ≈ 20.08, about 6x higher than concurrency 1.)*
+*(Screenshot: wrk stress-test result at concurrency 1 — QPS ≈ 3.30.)*
 
 From these results, you can see that as concurrency increases (1 → 10), QPS improved by about 6x (3.30 → 20.08), while average latency increased by about 30% (324.61ms → 426.84ms). Notably, the second load test experienced 2 timeout errors. This is because at higher concurrency, the server's load exceeded its processing capacity, and insufficient performance caused some requests to time out.
 
@@ -422,12 +415,12 @@ You can use Bailian's console to quickly deploy a model — this approach is sim
 
 The deployment process looks like this:
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01KkOfZb1HAtQ9sTyop_!!6000000000718-0-tps-2630-278.jpg" width="450">
+*(Screenshot: the Bailian console page for deploying a new or custom-tuned model.)*
 
 - **Choose a model**: choose a pre-provisioned model or a custom model.
     - Pre-provisioned model: a standard model supported by Bailian — choose the appropriate one to deploy, and you can see the list of supported models when you [deploy a new model](https://bailian.console.aliyun.com/?spm=a2c4g.11186623.0.0.63e56cfcXIU4Qj#/efm/model_deploy).
 
-        <img src="https://help-static-aliyun-doc.aliyuncs.com/assets/img/zh-CN/9723494371/p892458.png" width="300">
+        *(Screenshot: the Model Studio deployment flow — choose a model (pre-provisioned or custom), configure, and deploy.)*
 
     - Custom model: a model tuned on the Bailian platform — see: [models supported for tuning](https://help.aliyun.com/zh/model-studio/model-training-on-console?spm=a2c4g.11186623.0.0.63e56cfcMC90g9#a6da1accf0dun).
 - **One-click model deployment**: the console supports one-click model deployment, and you can also deploy quickly via the API.
@@ -484,7 +477,6 @@ Alternatively, you could consider ACS, which lets you get GPU compute containers
 ### 3.5 Comparing Cloud Service Options and Decision Recommendations
 
 When deploying a model on Alibaba Cloud, choosing between different services requires weighing **business requirements**, **model characteristics**, **technical capability**, **operational complexity**, **cost**, and other factors together. Below is a comparison of the deployment approaches above, along with recommendations for choosing between them:
-
 
 | Service | Characteristics | Best suited for |
 | --- | --- | --- |
@@ -546,14 +538,17 @@ In addition, edge-cloud collaborative deployment is another common approach.
 
 Edge-cloud collaborative deployment is well suited to scenarios that need real-time responsiveness but have limited compute resources — for example, Rokid partnering with the Qwen large model to build an edge-side companion voice robot, shown in the image below. Here, "edge" refers to the small model deployed on the client device, and "cloud" refers to the large model deployed in the cloud. These small models need to be fine-tuned to fit different client devices, and run in the same environment as the client application, handling simple tasks like initial data preprocessing before passing the processed information to the cloud, where the large model does the deeper processing — enabling fast, high-quality responses to the edge-side user's needs.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN015VBCB524nk9sYPd8s_!!6000000007436-0-tps-1662-474.jpg" width="650">
+*Figure (translated): edge-cloud collaboration deployment.*
+
+```text
+[Edge device: lightweight pre-processing] -> [Cloud: LLM deep processing] -> [Results returned quickly]
+```
 
 In certain specific scenarios, **embedded-system deployment** is the more suitable choice — for example, in cars, robots, and medical devices. This approach deploys the model directly on a hardware platform, enabling real-time control and decision-making, but it demands a high level of optimization for both the model and the hardware.
 
 So, when facing real business needs, you need to weigh system performance requirements, data privacy and security, and implementation complexity, to make sure your deployment approach is both efficient and sustainable.
 
 ## 🔥 Quiz
-
 
 ### 🔍 Multiple Choice 4.2.1
 <details>

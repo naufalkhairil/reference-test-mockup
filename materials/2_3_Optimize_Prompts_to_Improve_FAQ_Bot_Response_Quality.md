@@ -84,7 +84,6 @@ new_question_2 = question_2 + instruction
 ask_llm(new_question_2, query_engine)
 ```
 
-
 **Expected Output (Example):**
 > Your question pertains to company benefits, specifically annual leave. This information is typically recorded in the Employee Handbook or internal HR policy documents. I suggest contacting HR for the exact details. The HR contact is Wei Xiong (xiongwei@educompany.com).
 > 
@@ -194,8 +193,6 @@ In application development, it is impractical to expect end-users to write their
 In the RAG chatbot created using LlamaIndex, there is a default prompt template that looks like this:
 
 - The default template can be viewed using code. You can refer to [the code on the LlamaIndex official website.](https://docs.llamaindex.ai/en/stable/examples/prompts/prompts_rag/) The original LlamaIndex prompt template is:  
-
-
 
 ```text
 Context information is below.
@@ -612,7 +609,6 @@ print("--- Response Using Optimized Prompt ---")
 print(final_response)
 ```
 
-
 Through this iteration process, you'll get a response with a warm tone and clear structure—one that will undoubtedly leave a better first impression on new employees.
 
 This example demonstrates the tremendous value of Meta Prompting in improving user experience. It's not just about extracting information, but about **how to better present information**. When you encounter a tricky prompt problem, don't forget that your model itself is the best coach. By clearly describing your goals and challenges, you can guide it to build more powerful, precise, and "human-touch" prompts for you.
@@ -830,7 +826,6 @@ plt.tight_layout()
 plt.show()
 ```
 
-
 You can see that the LLM's response quality improves to varying degrees with each iteration. Through this quantitative evaluation, you can not only intuitively see the improvement from each optimization but also transform vague feelings of "good" or "bad" into clear, measurable data. This provides you with a scientific method to validate and iterate your prompt strategies, ensuring every improvement is evidence-based, ultimately delivering truly high-quality user experiences.
 
 ### 4.7 Let the LLM Help You Build a Custom "AI Judge"
@@ -842,16 +837,15 @@ The key issue is that relying on vague evaluations like "is the gap big or small
 <div align="center">
   *Figure (translated): constructing an "AI Judge" via meta-prompting — the judge compares the bot's answer with the standard answer and produces a gap analysis.*
 
-```mermaid
-flowchart LR
-    QA["Q&A bot answer"] --> J["AI Judge (LLM driven by a meta-prompt)"]
-    GT["Standard answer"] --> J
-    J --> R["Gap analysis + improvement suggestions"]
-    R --> QA
+```text
+[Q&A bot answer] ────┐
+                     ├──► [AI Judge (LLM driven by a meta-prompt)] ──► [Gap analysis + improvement suggestions]
+[Standard answer] ───┘                                                              │
+                                                                                   v
+                                                              (fed back to improve the bot)
 ```
   <p>Figure: Constructing an "AI Judge" via Meta-Prompting to replace the <code>analyze_gap()</code> method and enhance judgment accuracy.</p>
 </div>
-
 
 #### The "AI Judge" Training Process
 
@@ -878,13 +872,10 @@ The process of building an "AI Judge" can be seen as training a machine learning
 
 Finally, you decide when to stop "training" and adopt the version of the prompt that performs best on the evaluation set as your final "**AI Judge**."
 
-
 <div align="center">
     *(Figure: iterative optimization loop for the AI Judge — repeatedly update the judge using new training cases, and stop iterating based on training vs. evaluation performance.)*
   <p>Figure: Iterating the AI Judge via ML training; stop based on train vs. eval performance.</p>
 </div>
-
-
 
 #### 4.7.1 Prepare and Split the Dataset
 
@@ -929,7 +920,6 @@ labeled_samples = [
 train_set = labeled_samples[:3]
 eval_set = labeled_samples[3:]
 ```
-
 
 #### 4.7.2 Iterative "Training"
 
@@ -1043,7 +1033,6 @@ for i in range(max_iterations):
 print("\n--- Iteration Ended ---")
 final_judge_prompt = current_judge_prompt
 ```
-
 
 #### 4.7.3 "Good Enough" Means You Can "Stop Training"
 
@@ -1219,7 +1208,6 @@ def reasoning_model_response(user_prompt, system_prompt="You are a programming a
 reasoning_model_response(user_prompt="Who are you?")
 ```
 
-
 Through this example, you can see that reasoning models have an additional "`thinking process`" compared to general-purpose LLMs. It's like solving a math problem where someone first works through it step by step on scratch paper rather than giving the answer directly. This reduces "off-the-cuff" errors from the model. During the step-by-step thinking process, if a contradiction is found at a certain step, the model can go back to check and readjust its approach. Showing reasoning steps also makes it easier for people to understand and verify the logic by following the model's line of thinking.
 
 Compared to general-purpose LLMs, reasoning models are usually more reliable when solving complex problems, such as in scenarios requiring rigorous reasoning like math problem solving, code writing, or legal case analysis. This doesn't mean reasoning models are always better—both types of models have their respective use cases. The following table compares these two types of models across some typical dimensions:
@@ -1378,8 +1366,6 @@ In your final answer, only provide the optimized prompt itself, without any othe
 reasoning_model_response(user_prompt=meta_prompt_for_reasoning, system_prompt="You are a top-tier prompt engineering expert.")
 ```
 
-
-
 Through the above example, you can clearly see how the reasoning model analyzes the shortcomings of the original prompt step by step and, combined with our requirements (friendly tone, clear structure, engaging content, etc.), ultimately constructs an optimized prompt with more rigorous structure and clearer intent.
 
 This fully demonstrates the importance of using the right tool for the right task. Behind this is the trade-off between **task complexity** and **execution cost (time and money)**:
@@ -1439,7 +1425,6 @@ In the next section, you'll learn automated evaluation methods to test the Q&A b
 </details>
 
 ---
-
 
 <details>
 <summary style="cursor: pointer; padding: 12px; border: 1px solid #dee2e6; border-radius: 6px;">

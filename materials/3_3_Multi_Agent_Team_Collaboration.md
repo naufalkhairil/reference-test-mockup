@@ -50,7 +50,19 @@ This is the most direct simulation of how a "project team" works, and its core f
 1.  **Team Leader (Leader Agent)**: in this example it can be a "course project supervisor" Agent. It's responsible for receiving and understanding the top-level task (such as "write a Pandas data analysis course"), decomposing it into multiple concrete subtasks ("design the teaching outline," "provide core cases and code," "write the course text," etc.), and assigning these subtasks to suitable team members. It also tracks overall progress and, after all members finish, aggregates the results to form the final course text.
 2.  **Team Members (Member Agents)**: each has expertise in a specific domain (instructional designer, data scientist, content writer), focuses on executing the subtask assigned to it, and reports back to the Leader when done.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01yGBmAR1Qcg31uVcWZ_!!6000000001997-55-tps-962-268.svg" width="700">
+*Figure (translated): hierarchical planning — a Leader agent assigns subtasks, workers report back.*
+
+```text
+[Top-level task: write course] -> [Project manager: Leader Agent]
+                                      | (assign)              | (assign)                | (assign)
+                                      v                       v                         v
+                          [Instructional designer]   [Data scientist]      [Content writer]
+                                   (Teacher Li)           (Engineer Wang)        (Xiao Zhang)
+                                      │ (report)              │ (report)               │ (report)
+                                      └───────────────────────┴────────────────────────┘
+                                                              v
+                                                  [Final summary: complete course]
+```
 
 In AgentScope, you can implement the hierarchical-planning pattern using the handoff mechanism. In this pattern, the Leader Agent treats domain experts as tools, and assigning tasks and hearing reports are implemented in the form of tool calls. AgentScope also supports asynchronous tool calls and dynamic tool extension, meaning you can execute multiple expert Agents concurrently, and even let the Leader Agent create expert Agents in real time as needed.
 
@@ -89,7 +101,6 @@ Your workflow must strictly follow this order:
 4.  **Finally**, after receiving all experts' final results, integrate them into a final course document with unified formatting and complete content, then give it as your final reply.
 """
 
-
 # ---- 2. Unified model and Agent configuration ----
 
 def get_model_instance() -> DashScopeChatModel:
@@ -107,7 +118,6 @@ def create_member_agent(name: str, sys_prompt: str) -> ReActAgent:
         model=get_model_instance(),
         formatter=DashScopeMultiAgentFormatter(),
     )
-
 
 # ---- 3. Define the "team member" Agents as tools (Handoffs pattern) ----
 
@@ -165,7 +175,6 @@ async def invoke_writer_zhang(task_description: str, context: str = "") -> ToolR
     result_msg = await agent(Msg(name="user", role="user", content=content_for_agent))
     return ToolResponse(content=result_msg.get_text_content())
 
-
 # ---- 4. Organize the "hierarchical planning" workflow ----
 
 async def main() -> None:
@@ -201,7 +210,6 @@ async def main() -> None:
     print("  The project supervisor's final aggregated report:")
     print("="*50 + "\n")
     print(final_response_msg.get_text_content())
-
 
 # ---- 5. Run the main program ----
 await main()

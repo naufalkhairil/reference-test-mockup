@@ -31,11 +31,8 @@ The resulting vectors are stored in a specialized database (a vector database) t
 
     *Figure (translated): the RAG indexing pipeline.*
 
-```mermaid
-flowchart LR
-    Docs["Documents"] --> Chunk["Chunking (split into segments)"]
-    Chunk --> Embed["Embedding model (text → vectors)"]
-    Embed --> Store[("Vector database")]
+```text
+[Documents] -> [Chunking (split into segments)] -> [Embedding model (text -> vectors)] -> (Vector database)
 ```<br>
 
     After indexing, RAG applications can retrieve relevant text segments based on user questions.
@@ -51,13 +48,11 @@ After finding the relevant information, you use it to construct your answer. Sim
 
     *Figure (translated): the RAG retrieval-and-generation pipeline.*
 
-```mermaid
-flowchart LR
-    Q["User question"] --> E["Embedding model"]
-    E --> S["Similarity search in vector DB"]
-    S --> K["Top-k relevant chunks"]
-    K --> P["Prompt template: question + chunks"]
-    P --> M["LLM generates the answer"]
+```text
+[User question] -> [Embedding model] -> [Similarity search in vector DB] <- (Vector database)
+                                          |
+                                          v
+                        [Top-k relevant chunks] -> [Prompt template] -> [LLM] -> [Answer]
 ```<br>
 
 ## 2. Creating a RAG application

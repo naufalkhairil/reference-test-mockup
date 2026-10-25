@@ -19,8 +19,6 @@ To overcome these limitations, you need to build a complete system on top of an 
 | Execution          | Calls APIs, queries databases, sends messages             | ✋ Hands & Feet  |
 | Memory             | Stores history, experiences, lessons, supports decision-making | 📚 Memory       |
 
-
-
 These four modules form a **"Think-Act-Observe"** closed loop. Through this cycle, an Agent can autonomously plan, execute tasks, and adjust its behavior based on real-world feedback to accomplish complex tasks.
 
 ## 🍁 Goals
@@ -66,7 +64,15 @@ To enable the bot to access internet information, the most direct approach is to
 
 Suppose you have already written a function called web_search that can find information via a search engine. Now, when a user makes a request, you want the model to utilize this function. The simplest way to implement this is for the program to "hardcode" the execution of this function upon receiving a request, then send the execution result along with the original request to the LLM, allowing it to generate a summary response.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01lERk2B1mVjalZ5hOh_!!6000000004960-55-tps-2281-435.svg" width="700">
+*Figure (translated): hardcoded tool calling — the flow is fixed in code.*
+
+```text
+[User request] -> [Hardcoded execution: web_search] -> [Search results (text data)]
+      |                                                    |
+      └──────────────────┬─────────────────────────────────┘
+                         v
+                    [LLM (Qwen-Plus)] -> [Final response]
+```
 
 ```python
 # 1. User's original request
@@ -200,7 +206,16 @@ The next task is to ensure that the model can consistently and strictly output i
 
 3.  **Validate and retry**: After receiving the model's output, the program must strictly validate it using the same Schema. If validation fails, the program should capture the validation error message and send it, along with the model's previous erroneous output, back to the model as a correction clue, requesting it to regenerate.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01PPZqEP1NWJhdVXbPs_!!6000000001577-55-tps-2701-491.svg" width="800">
+*Figure (translated): structured output with schema validation and retry.*
+
+```text
+[User request] -> [Schema definition + prompt construction] -> [LLM generation] -> {Validate}
+                                                                                      |
+                              ┌─────────────── (Pass) ───────────────► [Structured result]
+                              │
+                              ├── (Fail, less than 2 times) ──► [Retry] ──► (back to LLM generation)
+                              └── (Timeout) ──► [Failure]
+```
 
 ```python
 import json
@@ -332,7 +347,16 @@ Taking OpenAI SDK's function calling as an example:
     4. Call the API again, sending the tool execution result back to the model.
     5. The model generates the final user response based on the tool's return.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01LQjXNd1NGkEiph7LF_!!6000000001543-55-tps-1696-1769.svg" width="700">
+*Figure (translated): the complete tool-calling sequence.*
+
+```text
+1. User -> LLM:   first API call (model + messages + tools)
+2. LLM -> User:   tool_calls returned (function_name + arguments)
+3. User -> Tool:  actual function call with arguments
+4. Tool -> User:  execution result
+5. User -> LLM:   second API call with tool results
+6. LLM -> User:   final response (based on tool results)
+```
 
 ```python
 import json
@@ -387,7 +411,7 @@ You will find that the results of tool calls are passed to the LLM through anoth
 
 We call this **think-act-observe** loop pattern **ReAct**, and Agents that work according to this pattern are called **ReAct Agents**.
 
-Manually implementing ReAct Agent logic is complex. To simplify the development process, we will use <a href="https://github.com/agentscope-ai/agentscope">AgentScope</a>, a production-grade Agent framework that has already encapsulated the complete logic of ReAct Agent and tool calling for you.
+Manually implementing ReAct Agent logic is complex. To simplify the development process, we will use [AgentScope](https://github.com/agentscope-ai/agentscope), a production-grade Agent framework that has already encapsulated the complete logic of ReAct Agent and tool calling for you.
 
 > AgentScope is a production-grade Agent framework designed for developers. It defines Agent communication, memory, and tool calling in a standardized way, allowing you to focus on business logic rather than underlying implementations. Key advantages of AgentScope include:
 > 
@@ -399,7 +423,15 @@ Manually implementing ReAct Agent logic is complex. To simplify the development 
 
 Let's look at how AgentScope implements the tool call we just discussed:
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01quzCo31zMekRGxENy_!!6000000006700-55-tps-1640-1098.svg" width="700">
+*Figure (translated): how AgentScope runs the same tool call.*
+
+```text
+1. Developer -> Agent:  configure model and formatter, register tool functions
+2. Developer -> Agent:  ask: find the paper "Attention Is All You Need"
+3. Agent -> Tool:       call search_arxiv_paper
+4. Tool -> Agent:       return paper links
+5. Agent -> Developer:  return result (ToolResponse)
+```
 
 ```python
 import asyncio
@@ -408,7 +440,6 @@ from agentscope.tool import Toolkit, ToolResponse
 from agentscope.model import DashScopeChatModel
 from agentscope.message import Msg, TextBlock
 from agentscope.formatter import DashScopeChatFormatter
-
 
 # 1. Define a tool that returns results using ToolResponse
 def search_arxiv_paper(query: str) -> ToolResponse:
@@ -487,8 +518,20 @@ To solve this problem, Anthropic proposed the **Model Context Protocol (MCP)**. 
 * **Without MCP**: Each AI application needs to encapsulate all tool definitions itself. When a tool is updated, all applications need to be modified.
 * **With MCP**: The tool service provider (e.g., search service) "broadcasts" its capability definitions. AI applications only need to connect to the service provider via the MCP protocol to automatically obtain the latest tool definitions, without hardcoding.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01vRbQ0S1tPxumQyLll_!!6000000005895-55-tps-3161-1436.svg" width="700">
+*Figure (translated): with vs. without MCP — MCP provides one unified tool definition shared by all applications.*
 
+```text
+Without MCP (each application wraps all tools itself):
+[Agent A] -> [Search service] + [Document service]
+[Agent B] -> [Search service] + [Document service]
+[Agent C] -> [Search service] + [Document service]
+
+With MCP (unified tool definition):
+[Agent A] ─┐
+[Agent B] ─┼──► [MCP] ──► [Search service]
+[Agent C] ─┘              [Document service]
+                          [Data service]
+```
 
 #### 1.5.3 Practice: Self-Hosting and Connecting to MCP Services
 
@@ -841,7 +884,11 @@ You are a top course writer.
 {original_notebook_content}
 ```
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01QeBLhn1msB07H0F3S_!!6000000005009-55-tps-1534-260.svg" width="700">
+*Figure (translated): single model call with generation, reflection, and correction all-in-one.*
+
+```text
+[Course draft] -> [Single LLM call: generate + reflect + correct (all-in-one)] -> [Output result]
+```
 
 This method has its advantages: the model can promptly detect and correct issues during generation, and the context remains coherent, reducing the overhead of multiple rounds of communication.
 However, it also has obvious drawbacks: when reflection is tied to generation, the model can easily fall into a "self-verification" trap, carrying the same cognitive bias into its self-assessment. For example, if it changed `usr_id` to `user_id` in the first step, it is very likely to consider this a "standardization improvement" rather than an error during the second step of reflection.
@@ -871,7 +918,14 @@ Please compare [Original Content] and [Polished Content]:
 
 ```
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01arwWzK25jS9mSLQBO_!!6000000007562-55-tps-2108-561.svg" width="700">
+*Figure (translated): writer + reviewer — the reviewer checks from an independent perspective.*
+
+```text
+[Course draft] -> [Writing Agent: generate content] -> [Review Agent: independent perspective check]
+                      ^                                        |
+                      |                (feedback: issues)      | (passed)
+                      └────────────────────────────────────────┴──────► [Output result]
+```
 
 Because the review Agent has a different perspective from the writing Agent, this method can effectively avoid most role biases. You can even set up multiple specialized review Agents—for factual review, logical review, style review, security review. This not only increases the comprehensiveness of the review but also facilitates later A/B testing and metric statistics.
 
@@ -889,7 +943,7 @@ However, this method also has obvious costs: each additional review Agent adds a
 >
 > In the "generate-feedback" loop, the original course document is repeatedly passed through multiple model calls—the writing Agent needs it, the review Agent needs it, and it may be used again during the correction phase. If the document is very long (e.g., a complete course with dozens of code examples), this repetition can lead to significant token consumption.
 >
-> Alibaba Cloud Model Studio provides a <a href="https://www.alibabacloud.com/help/en/model-studio/context-cache">context cache</a> mechanism to solve this problem: shared content (like the original document) is cached during the first call, and subsequent calls detect the same prefix and directly reuse it. The cached part is billed at 20% of the standard unit price.
+> Alibaba Cloud Model Studio provides a [context cache](https://www.alibabacloud.com/help/en/model-studio/context-cache) mechanism to solve this problem: shared content (like the original document) is cached during the first call, and subsequent calls detect the same prefix and directly reuse it. The cached part is billed at 20% of the standard unit price.
 > 
 > You can organize your Prompt structure like this:
 > ```
@@ -934,7 +988,20 @@ The specific workflow is as follows:
 3. **Obtain external feedback**: The tool returns the execution result, let's say an error: `TypeError: get_user_data() got an unexpected keyword argument 'usr_id'`.
 4. **Correct**: The Agent receives this error feedback. It now clearly knows what went wrong with the code. Based on this feedback, it generates corrected code.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01AD9PM029mRCVf8vtm_!!6000000008110-55-tps-3545-454.svg" width="1000">
+*Figure (translated): self-correction loop driven by external code-execution feedback.*
+
+```text
+[User input / document] -> [Writing Agent generates notebook (with erroneous code)]
+                                     |
+                                     v
+                            [Code interpreter executes code]
+                                     |
+                                     v
+[Agent corrects: reverts the wrong change to user_id] <- (external feedback: TypeError, usr_id)
+                                     |
+                                     v
+                          [Final correct notebook]
+```
 
 Below is a simple example implemented using AgentScope. The `execute_python_code` tool built into AgentScope does not require manually creating tool functions; you just need to register it via `toolkit.register_tool_function(execute_python_code)`.
 
@@ -954,7 +1021,6 @@ from agentscope.memory import InMemoryMemory
 from agentscope.message import Msg
 from agentscope.model import DashScopeChatModel
 from agentscope.tool import Toolkit, execute_python_code
-
 
 # ============================================================
 # Create writing Agent (equipped with code interpreter tool)
@@ -992,7 +1058,6 @@ def create_writer_agent() -> ReActAgent:
     )
 
     return writer
-
 
 # ============================================================
 # Main process
@@ -1162,7 +1227,11 @@ The key to building workflows is understanding the business and making the most 
 
 This is the most basic and intuitive workflow. It breaks a task into several fixed, sequentially executed steps. The output of the previous step serves strictly as the input for the next step. The entire process resembles a factory assembly line: unidirectional and immutable. The RAG Q&A bot you built earlier in this course is a perfect example of this pattern.
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01HuDh7v1KD8GVPSeEh_!!6000000001129-55-tps-2514-176.svg" width="800">
+*Figure (translated): the pipeline pattern — one-directional and immutable.*
+
+```text
+[Course draft] -> [Code extractor] -> [Code validator] -> [Report generator] -> [Final report]
+```
 
 ```python
 """ Pattern one: Pipeline - Scenario: Course quick check process
@@ -1245,7 +1314,13 @@ The rigidity of the pipeline is its greatest strength and also its most fatal we
 
 To overcome the rigidity of pipelines, you need to introduce decision-making capabilities. The core of the branching pattern is to set up a "router" or "dispatch center" at the beginning or at key nodes of the workflow. This decision node analyzes the input (e.g., user review requirements) and then, like a traffic policeman, directs the task to different, predefined processing paths (i.e., different pipelines or experts).
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01pZMqbg1yst0CIdiTg_!!6000000006635-55-tps-2206-542.svg" width="700">
+*Figure (translated): the router pattern — a distributor directs the task to the right expert path.*
+
+```text
+                             ┌──► [Code quick-check expert] ──────┐
+[Review request] -> {Task distributor / router}                  ├──► [Chief reviewer] -> [Output result]
+                             └──► [Language polishing expert] ────┘
+```
 
 ```python
 """ Pattern two: Branching - Scenario: Course review task distribution
@@ -1294,7 +1369,6 @@ async def branch_full_review(user_msg: Msg) -> Msg:
     )
     disable_console_output([agent])
     return await agent(user_msg)
-
 
 async def run_branching() -> None:
     router = create_agent(
@@ -1353,7 +1427,14 @@ Branching is essentially "one of many choices," and it is still sequential. It c
 
 When a request can be broken down into multiple independent subtasks, queuing them up is a huge waste. The core idea of the parallel execution pattern is "doing things simultaneously." It first breaks a complex task into multiple subtasks, then distributes these subtasks to different execution units (Agents or tools) for concurrent processing, and finally gathers all results to form the final output.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01UHv4l51rexeQFw6pe_!!6000000005657-55-tps-2243-759.svg" width="700">
+*Figure (translated): parallel execution — several experts review concurrently, then a chief editor merges.*
+
+```text
+                 ┌─► [Code reviewer] ─────────┐
+                 ├─► [Fact checker] ──────────┤
+[Course content] ┼─► [Pedagogy evaluator] ────┼─► [Chief editor: summary] ──► [Comprehensive report]
+                 └─► [Style editor] ──────────┘
+```
 
 ```python
 """ Pattern three: Parallel Execution - Scenario: Comprehensive course review
@@ -1440,7 +1521,13 @@ The prerequisite for this pattern is that subtasks are mutually independent. If 
 
 Unlike parallel execution, which aims to improve efficiency, the core objective of the Mixture-of-Agents pattern is to **pursue extreme quality, robustness, and creativity**. The core concept of MoA is based on a key discovery: **different LLMs have their own unique strengths and specialties, and when one model can refer to the outputs of other models, it often generates higher quality responses—this phenomenon is called "collaborativeness" of models**. The MoA approach involves having multiple **different LLMs** process the **same task** simultaneously, then an aggregation model synthesizes, analyzes, and merges all outputs to produce a final result that far surpasses the capabilities of any single model.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01OkCy2A1kYMdUG2eFb_!!6000000004695-55-tps-2204-821.svg" width="700">
+*Figure (translated): LLM debate — multiple analysts work on the same task, then an aggregator picks the best solution.*
+
+```text
+                 ┌─► [Analyst 1: Qwen3-Max] ─────────┐
+[Same task] ─────┼─► [Analyst 2: DeepSeek-V3.2] ─────┼─► [Aggregator: Qwen3-Max] ──► [Best solution]
+                 └─► [Analyst 3: Kimi-K2-Thinking] ──┘
+```
 
 ```python
 """ Pattern four: Mixture-of-Agents (MoA) - Scenario: Course core selling point extraction
@@ -1554,7 +1641,16 @@ The MoA demonstrated above is a "2-layer structure": the first layer has multipl
 
 **Key implementation points**:
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01tZII8q26LT1vgaxcs_!!6000000007645-55-tps-2817-832.svg" width="800">
+*Figure (translated): three-layer debate — analysts generate, reviewers critique, the aggregator merges.*
+
+```text
+Layer 1 (analysts):                            Layer 2 (reviewers):                        Layer 3:
+[Analyst 1: Qwen3-Max] ──────► [Reviewer 1: Qwen3-Max] ─────────┐
+[Analyst 2: DeepSeek-V3.2] ──► [Reviewer 2: DeepSeek-V3.2] ─────┼─► [Aggregator: Qwen3-Max] ──► [Best solution]
+[Analyst 3: Kimi-K2-Thinking] ► [Reviewer 3: Kimi-K2-Thinking] ─┘
+        ▲
+   [Same task]
+```
 
 ```python
 async def run_multi_layer_moa() -> None:
@@ -1683,7 +1779,16 @@ You can balance cost and quality with the following strategies:
 
 So far, all the workflows you've designed are fully automated. However, in the real world, fully entrusting all decision-making power to AI carries risks, especially when dealing with ambiguous teaching concepts or high-value course content. The Human-in-the-Loop pattern no longer pursues complete automation; instead, it intentionally designs one or more "pause points" in the workflow, handing control back to humans for decision-making, approval, or quality control, before returning the task to the workflow to continue execution. This is a critical pattern for building trustworthy and secure AI systems.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01cFnMzE1yf97W0GHAO_!!6000000006605-55-tps-2111-413.svg" width="700">
+*Figure (translated): human-in-the-loop — a human expert reviews and decides when the agent is uncertain.*
+
+```text
+[Course content] -> [AI analyst: provides suggestions] -> [AI rewriter: executes modifications] -> {Human expert review}
+       ^                                                                                               |
+       └──────────────────────────── (when uncertain, send back) ◄──────────────────────────────────────┘
+                                                                                                       │ (approved)
+                                                                                                       v
+                                                                                                [Final version]
+```
 
 ```python
 """ Pattern five: Human-in-the-Loop (HITL) - Scenario: Course difficult point review (Human as a Tool)
@@ -1831,13 +1936,28 @@ The bot faithfully initiates your preset workflow:
 
 At this point, your bot cannot proceed further—because the designed workflow contains no logic to handle unexpected failures like “competitor analysis tool breakdown.”
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01gaGI3E1nRttOn9JCk_!!6000000005087-55-tps-2409-750.svg" width="700">
+*Figure (translated): without exception handling the workflow gets stuck when an unexpected failure occurs.*
+
+```text
+                              ┌─► [Industry needs: success] ──────────────┐
+[Python course research] ───►{Parallel execution}├─► [User profile: success] ────────────────┼─► [Summary results]
+                              └─► [Competitive analysis: website redesign cannot be parsed] ──┘
+                                                              |
+                                                              v
+                                                  [Process interrupted: stuck]
+```
 
 ### 4.2 Naive solution: Adding new branches
 
 You might think: just add an exception-handling branch. For example, if `analyze_competitor_course` fails, trigger a new step—such as notifying the course designer for manual intervention.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01UUnESl1ZKf0pf07q2_!!6000000003176-55-tps-3187-720.svg" width="900">
+*Figure (translated): exception handling via human intervention — the failed branch is handed to a human, then the workflow continues.*
+
+```text
+                              ┌─► [Industry needs: success] ──────────────────────────┐
+[Python course research] ───►{Parallel execution}├─► [User profile: success] ────────────────────────────┼─► [Summary of results] ──► [Process completed]
+                              └─► [Competitive analysis: website redesign cannot be parsed] ─► [Human intervention] ──┘
+```
 
 This “patch-on-demand” approach may seem effective—but what if next time the industry demand analysis API is temporarily down? Would you add another branch? What if the data source format changes during user persona definition? Another branch again?
 
@@ -1869,7 +1989,15 @@ Its new workflow looks like this:
 2.  **Dynamic planning**: The Agent’s “brain” (an LLM) reasons over the goal, decomposes it, and dynamically generates an **action plan**—a sequence of executable steps.
 3.  **Execute plan**: An execution engine carries out the plan by invoking tools step-by-step, just like running a standard workflow.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01WZYGdT1oFMfYInMqE_!!6000000005195-55-tps-3068-275.svg" width="900">
+*Figure (translated): the plan-and-execute paradigm — the plan becomes a generatable, executable artifact.*
+
+```text
+[User goal: research Python course] -> [Agent: planning] -> [Dynamically generated plan] -> [Executor]
+                                                                                              |
+                ┌─────────────────────────────────────────────────────────────────────────────┤
+                v                                                                             v
+[Tool 1: industry needs]    [Tool 2: user profile]    [Tool 3: competitive analysis] ...  ──► [Completed]
+```
 
 In this paradigm, the “plan” itself becomes a first-class, generatable, and executable artifact. The LLM is no longer a static node within a pipeline—it becomes the **creator** of the workflow.
 
@@ -1885,7 +2013,6 @@ from agentscope.message import Msg, TextBlock
 from agentscope.model import DashScopeChatModel
 from agentscope.tool import Toolkit, ToolResponse
 from agentscope.plan import PlanNotebook
-
 
 # Simulate business tools
 async def analyze_competitor_course(url: str) -> ToolResponse:
@@ -1915,7 +2042,6 @@ async def extract_text_from_pdf(url: str) -> ToolResponse:
         TextBlock(type="text", text=f"✅ Extracted outline text from {url}: 1. Variables and data types... 2. ...")
     ])
 
-
 # Hook function for monitoring plan changes
 plan_snapshots = []
 
@@ -1935,7 +2061,6 @@ def capture_plan_snapshot(notebook, plan):
                 for st in plan.subtasks
             ]
         })
-
 
 async def main():
 
@@ -1997,7 +2122,6 @@ async def main():
         for i, subtask in enumerate(final_plan["subtasks"], 1):
             icon = "✅" if subtask["state"] == "finished" else "⏳"
             print(f"  {icon} {i}. {subtask['name']}")
-
 
 await main()
 ```
@@ -2089,7 +2213,19 @@ When the Agent identifies that existing tools cannot meet its needs, its plan wi
 3. Call new tool: After the new tool is successfully created in the code execution environment, the Agent can directly call it in subsequent plan steps, just as if the tool had existed from the beginning.
 4. Extend tool library: This newly generated tool can be added to the temporary tool library for the current task, for reuse in subsequent steps.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01YFpNqc22u2SnfUBXl_!!6000000007179-55-tps-3037-745.svg" width="900">
+*Figure (translated): autonomous tool creation — when existing tools are insufficient, the agent generates and registers a new one.*
+
+```text
+[Receive task] -> [Agent analyzes requirements] -> {Are existing tools sufficient?}
+                                                    | (yes)                       | (no)
+                                                    v                             v
+                                    [Use existing tools: complete task]   [Create new tool: identify gaps -> generate code]
+                                                    |                             |
+                                                    └──────────► [Execute: register -> invoke tool]
+                                                                      |
+                                                                      v
+                                                 [Task completed; tool library expanded (new tool is reusable)]
+```
 
 Below is a simple example built using AgentScope, where the Agent can autonomously create and register a `factorial` tool during the planning process, based on the existing `add` tool, and then call it in subsequent tasks.
 
@@ -2109,7 +2245,6 @@ from agentscope.tool import Toolkit, ToolResponse
 
 # Global toolkit
 toolkit = None
-
 
 async def code_exec(code: str) -> ToolResponse:
     """Code interpreter - Used to create and register new tools"""
@@ -2140,14 +2275,12 @@ async def code_exec(code: str) -> ToolResponse:
             text=f"❌ Error: {e}"
         )])
 
-
 async def add(a: float, b: float) -> ToolResponse:
     """Addition tool"""
     return ToolResponse(content=[TextBlock(
         type="text", 
         text=f"{a} + {b} = {a + b}"
     )])
-
 
 async def main():
     if "DASHSCOPE_API_KEY" not in os.environ:
@@ -2202,7 +2335,6 @@ async def main():
     for i, s in enumerate(toolkit.get_json_schemas(), 1):
         print(f"{i}. {s['function']['name']}")
 
-
 if __name__ == "__main__":
     await main()
 ```
@@ -2239,7 +2371,20 @@ When a user gives the instruction “Search for books about AI on Amazon”:
 4.  **Loop execution**: It continues this “perceive-plan-act” loop until all steps are completed and returns the list of searched books.
 5.  **Exception handling**: If it encounters an unexpected event at any step, such as a captcha popping up after clicking search, it won’t get stuck. It will perceive this new situation and insert “handle captcha” as a new obstacle into the current plan, attempting to resolve it or ask the user for help.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01Rk5QY81Z1sm1V78Y9_!!6000000003135-55-tps-4563-766.svg" width="1000">
+*Figure (translated): a planning agent driving a browser — perceive, decide, and re-plan on unexpected obstacles.*
+
+```text
+[Goal: search AI books on Amazon] -> [LLM initial planning] -> [Generate action: open amazon.com] -> [Browser executes operation]
+                                                                                                            |
+                                                                                                            v
+                                                                                                [Perceive page state (HTML + screenshot)]
+                                                                                                            |
+                                                                                                            v
+                                                                                       {LLM decision: analyze page, plan next step}
+                                                                                       | (task completed)          | (unexpected issue)
+                                                                                       v                           v
+                                                                            [Output result: book list]     [Re-plan] ──► (back to generating actions)
+```
 
 This case fully demonstrates the core advantage of a planning Agent: it is no longer a script executor but achieves true **adaptive** operation in dynamic, unknown web environments through a continuous “perceive-plan-act” loop.
 
@@ -2280,7 +2425,19 @@ This is the most direct simulation of how a “project team” works, characteri
 1.  **Leader Agent**: In this example, it could be a “Course Project Manager” Agent. It is responsible for receiving and understanding top-level tasks (e.g., “Write a Pandas data analysis course”), breaking them down into multiple specific subtasks (“Design teaching outline,” “Provide core cases and code,” “Write course text”), and assigning these subtasks to appropriate team members. It is also responsible for tracking overall progress and, after all members complete their tasks, aggregating the results to form the final course document.
 2.  **Member Agents**: Each possesses expertise in a specific domain (teaching designer, data scientist, content writer), focusing on executing assigned subtasks and reporting back to the Leader upon completion.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01l9c4OX1lIAF6FPbHZ_!!6000000004795-55-tps-2028-572.svg" width="700">
+*Figure (translated): hierarchical planning — a Leader agent assigns subtasks and workers report back.*
+
+```text
+[Top-level task: write course] -> [Project manager: Leader Agent]
+                                      | (assign)              | (assign)                | (assign)
+                                      v                       v                         v
+                          [Instructional designer]   [Data scientist]      [Content writer]
+                                   (Teacher Li)           (Engineer Wang)        (Xiao Zhang)
+                                      │ (report)              │ (report)               │ (report)
+                                      └───────────────────────┴────────────────────────┘
+                                                              v
+                                                  [Final summary: complete course]
+```
 
 In AgentScope, you can implement the hierarchical planning pattern using a handoff mechanism. In this pattern, the Leader Agent treats each domain expert as a tool, and task assignment and reporting are achieved through tool calls. AgentScope also supports asynchronous tool calls and dynamic tool extension, meaning you can execute multiple expert Agents concurrently and even allow the Leader Agent to create expert Agents in real-time as needed.
 
@@ -2438,7 +2595,16 @@ In this pattern, there is no high-level coordinator; instead, a group of experts
 3.  **Stimulation and deepening**: In each iteration, all Agents read all new ideas from others in the shared space. These ideas will inspire them to generate new insights, or to revise, supplement, or question their own solutions, and then write the updated ideas back. For example, the **data scientist** Agent proposes using “analyzing user movie rating data” as a case; the **instructional designer** Agent sees this and adds, “students can be guided to explore rating trends for different movie genres”; and the **content writer** Agent suggests, “the case can be packaged as a story titled ‘Unveiling the Movie Recommendation System’.”
 4.  **Reach consensus**: This “read-think-write” loop continues until a final solution, approved by most Agents, emerges in the system, or a preset number of iterations is reached.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01iDn3At1CApLWGs6J6_!!6000000000041-55-tps-2033-1215.svg" width="700">
+*Figure (translated): co-creation via MsgHub — all agents read/write ideas in a shared space over multiple rounds.*
+
+```text
+[Open-ended task: design course] -> [Shared space: MsgHub] <──► [Instructional designer: Teacher Li]
+                                      │      ▲                 <──► [Data scientist: Engineer Wang]
+                                      │      │                 <──► [Content writer: Xiao Zhang]
+                                      │      └────────────── (multi-round iteration, mutual inspiration)
+                                      v
+                          [Meeting secretary: organize and summarize] ──► [Team outcome: course outline]
+```
 
 In AgentScope, you can implement the co-creation collaboration pattern using MsgHub. In this pattern, any Agent's reply is automatically “heard” by other participants and used as context.
 
@@ -2715,7 +2881,15 @@ The simplest and most crude method is to only remember recent events, which is c
 - **Applicable scenarios**: Suitable for scenarios where information value decays rapidly over time, such as chatbots or simple customer service Q&A.
 - **Boundary conditions**: This is a “one-size-fits-all” forgetting solution. If critical information from early in the conversation (e.g., the user’s core goal set in the first turn) is truncated, the Agent will “forget” again, leading to broken conversational logic.
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01OrDums1alyFGFhF04_!!6000000003371-55-tps-2107-494.svg" width="700">
+*Figure (translated): fixed-window truncation — keep only the most recent N entries, forgetting the earliest.*
+
+```text
+[Conversation history: rules A B C D] -> [Fixed window: keep only the most recent N entries]
+                                              │
+                                    ┌─────────┴─────────┐
+                                    v                   v
+                          [Retain: rules C D]   [Discard: rules A B]
+```
 
 In `AgentScope`, this functionality is implemented by the `Formatter` component. You can pass the `max_tokens` parameter when initializing `Formatter` to limit the context length.
 
@@ -2771,7 +2945,17 @@ Simple truncation directly discards information, which is obviously not ideal. A
 - **Applicable scenarios**: Suitable for tasks requiring long-term goal consistency, such as project planning or long-form content creation.
 - **Boundary conditions**: It introduces additional API call costs (for generating summaries), and the quality of the summary directly affects subsequent conversations.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN011GzJSI1TeuplTK3gt_!!6000000002408-55-tps-2618-454.svg" width="800">
+*Figure (translated): summary memory — when history exceeds a threshold, the LLM compresses it into a summary.*
+
+```text
+[Full history: conversations 1-10] -> {Check length}
+                                       | (does not exceed threshold)    | (exceeds threshold)
+                                       v                                v
+                                [Keep as is]                [LLM generates summary]
+                                                                         |
+                                                                         v
+                                                          [Compressed: summary + recent conversation]
+```
 
 Currently, `AgentScope` does not have this feature built-in, but you can easily implement this logic by customizing a `Memory` class. Below is a **conceptual implementation idea**:
 
@@ -2831,7 +3015,20 @@ This “on-demand retrieval” pattern is central to building advanced memory sy
 - **Applicable scenarios**: This is the foundation for building truly intelligent, long-term interactive Agents. Suitable for all complex scenarios such as personalized assistants, enterprise knowledge bases, and intelligent learning companions.
 - **Boundary conditions**: The system complexity is highest. It introduces new technology stacks such as Embedding models and vector databases.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01tb8yvV1Px00aHdbgB_!!6000000001906-55-tps-3558-708.svg" width="1000">
+*Figure (translated): long-term memory with a vector database — store memories offline, retrieve the most relevant ones per new question.*
+
+```text
+Storage phase:    [Conversation content] -> [Convert to vector (embedding)] -> (Vector database)
+                                                                                  |
+                                                                                  v
+Retrieval phase:  [New question] -> [Convert to vector] -> [Similarity search]
+                                                              |
+                                                              v
+                                                   [Retrieval results: top-K relevant conversations]
+                                                              |
+                                                              v
+                                      [Combine relevant memories + new question] -> [Send to model]
+```
 
 `AgentScope` elegantly implements this feature through the `Mem0LongTermMemory` module. It supports two working modes:
 
@@ -2878,7 +3075,6 @@ ltm_agent_static = create_agent(
     long_term_memory=long_term_memory,
     long_term_memory_mode="static_control", # Key parameter: set to static control mode
 )
-
 
 async def run_ltm_static_test():
     # Conversation one: Store a key piece of information
@@ -2927,7 +3123,6 @@ ltm_agent_active = create_agent(
     long_term_memory=long_term_memory,
     long_term_memory_mode="agent_control", # Key parameter: set to Agent control mode
 )
-
 
 async def run_ltm_active_test():
     # Conversation one: Agent autonomously decides to record information
@@ -3052,7 +3247,25 @@ For complex Agent systems, you cannot predefine all perfect evaluation metrics b
 
 This loop repeats, and your evaluation system becomes increasingly perfect and precise as the Agent evolves. The figure below shows this complete closed-loop process:
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01I8JNo11e127NWm4wM_!!6000000003810-55-tps-2904-796.svg" width="900">
+*Figure (translated): the evaluation-driven closed loop.*
+
+```text
+[MVP] -> [Real execution] -> [Observe errors] -> [Extract metrics]
+                                                     │
+                                ┌────────────────────┴────────────────────┐
+                                v                                         v
+               [Objective metrics: executability /        [Subjective metrics: accuracy /
+                format / character count]                   teaching quality / style]
+                                │                                         │
+                                v                                         v
+                           [LLM evaluation]                       [Human evaluation]
+                                └────────────────────┬────────────────────┘
+                                                     v
+                                             [Aggregate score]
+                                                     │
+                                                     v
+                                              [Improve agent] ──► (back to MVP)
+```
 
 As shown, starting from MVP, through real operation, error observation, metric refinement, combined with both objective and subjective evaluation methods, ultimately leads to continuous improvement of the Agent. Next, we delve into how to design these two types of metrics.
 
@@ -3159,7 +3372,14 @@ The following example demonstrates "drafting a Pandas data analysis course lesso
 - Fine-grained subjective scoring (LLM-as-Judge): evaluates five dimensions (language clarity/ambiguity, factual correctness, consistency, redundancy (lower redundancy, higher score), readability) on a 1-5 scale; uses structured output for stable scoring.
 - Tracing (optional): Set `AGENTSCOPE_STUDIO_URL` (to connect to AgentScope Studio) or `OTEL_TRACING_URL` (to connect to any OTLP-compatible backend) to automatically enable tracing; the example runs normally if not set.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01sVlrx61EZg4DxUddO_!!6000000000366-55-tps-2177-495.svg" width="700">
+*Figure (translated): example evaluation pipeline — a generation agent drafts a chapter, a review agent scores it across five dimensions.*
+
+```text
+[Course benchmark: pandas task] -> [Generation agent] -> [Chapter draft: title / objectives / code / quiz]
+                                                                 |
+                                                                 v
+                                                          [Review agent] -> [Five-dimensional scoring] -> [Results summary]
+```
 
 ```python
 # End-to-end evaluation for educational course writing (pandas): two lesson drafts + five-dimension LLM scoring

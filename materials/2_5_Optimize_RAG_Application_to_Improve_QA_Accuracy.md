@@ -284,7 +284,16 @@ So far, you have made some improvements to increase the RAG chatbot's Q&A accura
 
 RAG is a technology that combines information retrieval and generative models, allowing it to leverage relevant information from an external knowledge base when generating answers. Its workflow can be divided into several key steps: parsing and chunking, vector storage, retrieval recall, and answer generation. You can refer back to the section "Expanding the Knowledge Scope of the RAG chatbot" for specific concepts.
 
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01zk9HW723iQ11MXgEJ_!!6000000007289-2-tps-5205-2710.png" alt="RAG Working Principle" width="800px">
+*Figure (translated): the complete RAG working principle — an offline indexing phase and an online retrieval-and-generation phase.*
+
+```text
+Indexing phase (offline):
+[Documents] -> [Chunking] -> [Embedding model] -> (Vector database)
+                                                      |
+                                                      v
+Retrieval & generation phase (online):
+[User question] -> [Embedding] -> [Similarity search] -> [Top-k relevant chunks] -> [Prompt template] -> [LLM] -> [Answer]
+```
 
 Next, we will focus on each step of RAG, and optimize its performance.
 
@@ -309,7 +318,7 @@ When we project the intent space and knowledge space together, we find that ther
     * Recalling irrelevant information may interfere with the LLM's responses.
     * Therefore, you need to optimize the recall algorithm to avoid recalling unrelated content. Additionally, you should periodically check the knowledge base and remove irrelevant content.
 
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01Icn1Bt1tDbCqYa94M_!!6000000005868-2-tps-2122-1176.png" alt="RAG Intent Space to Knowledge Space" width="1000px">
+*(Figure: mapping the user's intent space to the knowledge base's knowledge space — retrieve only the knowledge matching the user's intent to avoid pulling in unrelated content, and periodically clean irrelevant content out of the knowledge base.)*
 
 Before attempting to optimize engineering or algorithms, you should prioritize building a mechanism that continuously collects user intents. By systematically gathering real user needs to enrich the knowledge base content and involving domain experts with deep understanding of user intents in the evaluation process, a closed-loop optimization process of "data collection - knowledge update - expert validation" is formed to ensure the effectiveness of the RAG chatbot.
 
@@ -582,8 +591,6 @@ A chunking method specifically optimized for Markdown documents.
 
 Example Markdown text:
 
-
-
 ```markdown
 # RAG Framework
 LlamaIndex is a powerful RAG framework.
@@ -636,7 +643,7 @@ The text embedding model can convert text into high-dimensional vectors to repre
 
 _A directed line segment in a plane coordinate system is a 2-dimensional vector. For example, the directed line segment from the origin (0, 0) to point A (xa, ya) can be called vector A. The smaller the angle between vector A and vector B, the higher their similarity._
 
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01wKAL7C1bhDgbxr2Aa_!!6000000003496-0-tps-1556-1382.jpg" width="350" ></td>
+*(Figure: vectors A and B drawn in a 2D coordinate space — the smaller the angle between them, the higher their similarity.)*</td>
 
 ```python
 import numpy as np
@@ -711,7 +718,6 @@ for q in test_queries:
     compare_embeddings(q, chunks, embedding_models)
 ```
 
-
 **Analysis of Similarity Results:**
 *   **Role Matching:** Notice the "gap" in scores. In **v4**, the similarity for the "Technical Writer" is significantly higher than for the irrelevant roles (~0.58 vs ~0.33). In **v3**, the scores are much closer, indicating that the model is "distracted" by the shared name.
 *   **Attribute Lookup:** **v4** "locks on" to the unique identifier (**EID-220**) with a clear spike in similarity. **v3** struggles to distinguish it from other records because the recurring name "Michael Johnson" carries too much weight in its calculation.
@@ -783,7 +789,6 @@ compare_embedding_models(
     sentence_splitter=sentence_splitter
 )
 ```
-
 
 **Analyzing the Evaluation Results:**
 When running the pipeline with the question *"What does Michael Johnson do?"*, the results often present a fascinating "teaching moment" where metrics and behavior tell different stories:
@@ -898,8 +903,8 @@ From the perspective of intervention timing, solutions can be divided into two m
     </tr>
     <tr>
       <td>Ask the User</td>
-      <td>"What are the job responsibilities?" => LLM asks back: "May I ask which position’s job responsibilities you want to know about?" <em>Prompt examples for asking back can be found here:</em><a href="https://www.alibabacloud.com/help/en/model-studio/use-multi-agent-to-query-alibaba-cloud-resource-information">Build a multi-agent system with automatic planning capabilities using the Assistant API
-</a></td>
+      <td>"What are the job responsibilities?" => LLM asks back: "May I ask which position’s job responsibilities you want to know about?" <em>Prompt examples for asking back can be found here:</em>[Build a multi-agent system with automatic planning capabilities using the Assistant API](https://www.alibabacloud.com/help/en/model-studio/use-multi-agent-to-query-alibaba-cloud-resource-information)
+</td>
     </tr>
     <tr>
       <td>Think and Plan Multiple Searches</td>

@@ -77,27 +77,21 @@ To avoid maintaining an ever-growing keyword list, you might consider using LLMs
 Alibaba Cloud offers **[AI Guardrails](https://www.alibabacloud.com/en/product/ai_guardrails)**, a product specifically designed for securing LLM applications. It leverages extensive industry-accumulated security experience to comprehensively review input and output risks.
 
 <div align="center">
- <a href="https://img.alicdn.com/imgextra/i3/O1CN017VgXYQ1FwPK9qISaL_!!6000000000551-2-tps-4083-1803.png" target="_blank">
-  <img src="https://img.alicdn.com/imgextra/i3/O1CN017VgXYQ1FwPK9qISaL_!!6000000000551-2-tps-4083-1803.png" width="1000">
- </a>
+ *(Input text, images, and video pass through multiple detection modules — text moderation, image moderation — before reaching the model.)*
  <p><em>Figure: AI Guardrails Multi-modal Detection Scheme</em></p>
 </div>
 
 The system supports **ultra-long context processing** and **streaming processing**, enabling real-time audit of generated content.
 
 <div align="center">
- <a href="https://img.alicdn.com/imgextra/i2/O1CN01CE7PEB1Uwbja5s2xU_!!6000000002582-2-tps-3795-2021.png" target="_blank">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN01CE7PEB1Uwbja5s2xU_!!6000000002582-2-tps-3795-2021.png" width="1000">
- </a>
+ *(Streaming responses are audited incrementally as tokens are generated, so risky content is blocked in time.)*
  <p><em>Figure: AI Guardrails Streaming Audit Scheme</em></p>
 </div>
 
 Integration is simple via **API/SDK**. See [Accessing AI Guardrails](https://www.alibabacloud.com/help/en/content-moderation/latest/fast-use-of-ai-safety-guardrail) for details.
 
 <div align="center">
- <a href="https://img.alicdn.com/imgextra/i3/O1CN01E6qoz427AlNI9nXih_!!6000000007757-2-tps-2863-895.png" target="_blank">
-  <img src="https://img.alicdn.com/imgextra/i3/O1CN01E6qoz427AlNI9nXih_!!6000000007757-2-tps-2863-895.png" width="1000">
- </a>
+ *(Integration via API/SDK, supporting synchronous and streaming call modes.)*
  <p><em>Figure: Multiple Access Methods for AI Guardrails</em></p>
 </div>
 
@@ -148,7 +142,6 @@ from alibabacloud_green20220302.client import Client
 from alibabacloud_green20220302 import models
 from alibabacloud_tea_openapi.models import Config
 import json
-
 
 def query_detect(prompt):
     config = Config(
@@ -236,7 +229,6 @@ Expected Response:
   
 > Please refer to the documentation: https://www.alibabacloud.com/help/en/model-studio/error-code
 
-
 The request is rejected due to non-compliant input. The response clearly indicates the failure reason via "code": "data_inspection_failed" and message. This ensures malicious inputs are intercepted, protecting your bot.
 
 Test with a risky response:
@@ -266,24 +258,17 @@ You might wonder whether such attacks can be defended against by directly using 
 
 Beyond built-in detection, AI Guardrails allows custom rule management. You can upload your own sensitive keywords to a [private lexicon](https://yundun.console.alibabacloud.com/?p=guardrail#/protectConfig/lexiconManage).
 
-
 <div align="center">
- <a href="https://img.alicdn.com/imgextra/i2/O1CN01LFcv1O1h61HMpASAD_!!6000000004227-2-tps-2346-1320.png" target="_blank">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN01LFcv1O1h61HMpASAD_!!6000000004227-2-tps-2346-1320.png" width="900">
- </a>
+ *(Console page for lexicon management — e.g. creating an "Internal Sensitive Information" lexicon with custom sensitive terms.)*
  <p><em>Lexicon Management</em></p>
 </div>
-
 
 For example, create a lexicon named "Internal Sensitive Information" and add internal terms like project codes or data names (`xxx (privatized sensitive words)`). Then, associate this lexicon in "Protection Configuration"—e.g., editing the `query_security_check_intl` rule or `response_security_check_intl` rule and linking your custom lexicon.
 
 <div align="center">
- <a href="https://img.alicdn.com/imgextra/i3/O1CN01Vj3GPr1yxvMaytQeN_!!6000000006646-2-tps-3446-1754.png" target="_blank">
-  <img src="https://img.alicdn.com/imgextra/i3/O1CN01Vj3GPr1yxvMaytQeN_!!6000000006646-2-tps-3446-1754.png" width="900">
- </a>
+ *(Configuring a protection policy that references the lexicon — requests containing private keywords are then detected.)*
  <p><em>Protection Configuration</em></p>
 </div>
-
 
 After configuration, a request containing your private keyword will be intercepted. You can verify a custom rule was triggered via `label: customized` in the response. See [Lexicon Management](https://www.alibabacloud.com/help/en/content-moderation/latest/thesaurus-management) for details.
 
@@ -294,7 +279,6 @@ This approach combines broad threat protection with business-specific customizat
 Your AI application may also need to detect risks in uploaded images. AI Guardrails provides **multi-modal protection**, capable of reviewing both image content and text within images. 
 
 > We will soon launch this capability on the international site — stay tuned! You can refer to the [Multimodal SDK Reference](https://www.alibabacloud.com/help/en/content-moderation/latest/multimodal-sdk-reference) to test image moderation once it's available.
-
 
 **Example: Image compliance check**
 
@@ -310,7 +294,6 @@ import json
 
 text = "Please check if these artworks are compliant."
 image_url = "https://developer-labfileapp.oss-cn-hangzhou.aliyuncs.com/ACP/LLM/%E6%A2%B5%E9%AB%98%E6%98%9F%E5%A4%9C.jpeg"
-
 
 def image_detect(prompt, url):
     config = Config(
@@ -389,9 +372,7 @@ Based on the results, you can decide whether to allow the image into the system.
 By combining text and image detection, Alibaba Cloud AI Guardrails can effectively mitigate content compliance risks, data leakage, prompt injection, hallucinations, jailbreaks, and other AI security threats.
 
 <div align="center">
-  <a href="https://img.alicdn.com/imgextra/i3/O1CN016aMj4P1NSeWHOfyXa_!!6000000001569-2-tps-2395-1654.png" target="_blank">
-      <img src="https://img.alicdn.com/imgextra/i3/O1CN016aMj4P1NSeWHOfyXa_!!6000000001569-2-tps-2395-1654.png" width="1000">
-  </a>
+  *(Overview of AI security guardrail application scenarios.)*
   <p><em>Figure: AI Security Guardrail Product Application Scenarios</em></p>
 </div>
 
@@ -449,9 +430,7 @@ These cases target the model’s training data, affecting its knowledge base and
         * Configure AI Guardrails at output to detect and block privacy leaks (such as inferred phone numbers or IDs).
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i4/O1CN01Y6JNUc29f6pxkYEFh_!!6000000008094-2-tps-1356-495.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i4/O1CN01Y6JNUc29f6pxkYEFh_!!6000000008094-2-tps-1356-495.png" width="1000">
-    </a>
+    *(Risks in model training data — poisoned or harmful training data influences model behavior.)*
     <p><em>Figure: Model Training Data Risk</em></p>
 </div>
 
@@ -491,9 +470,7 @@ These "users" collect Q&A pairs to train a near-identical clone, stealing your R
     * **Bot Traffic Identification**: Deploy **Crawler Risk Management** to detect and block automated scripts via behavioral analysis.
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i3/O1CN01JafIM91vLVGEuPet2_!!6000000006156-2-tps-426-498.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i3/O1CN01JafIM91vLVGEuPet2_!!6000000006156-2-tps-426-498.png" width="300">
-    </a>
+    *(Model theft — attackers replicate a model's capability by querying it at scale.)*
     <p><em>Figure: Model Theft</em></p>
 </div>
 
@@ -515,9 +492,7 @@ The bot, believing it’s a test, complies—revealing dangerous information. Th
   Use **AI Guardrails**, which includes built-in detection for role-playing, command overwriting, and jailbreaking.
 
 <div align="center">
-<a href="https://img.alicdn.com/imgextra/i1/O1CN01LBP2PA1J0TgDCx4kd_!!6000000000966-2-tps-1274-405.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i1/O1CN01LBP2PA1J0TgDCx4kd_!!6000000000966-2-tps-1274-405.png" width="1000">
-</a>
+*(A prompt-injection example: an instruction hidden inside input text overrides the system prompt.)*
 <p><em>Figure: Example of a prompt injection attack</em></p>
 </div>
 
@@ -534,9 +509,7 @@ The bot inadvertently discloses its system prompt, revealing its own system prom
   Use **AI Guardrails** to detect and block probing patterns.
 
 <div align="center">
-<a href="https://img.alicdn.com/imgextra/i2/O1CN01uHhaOH1LM7d3vf4gj_!!6000000001284-2-tps-1575-841.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01uHhaOH1LM7d3vf4gj_!!6000000001284-2-tps-1575-841.png" width="1000">
-</a>
+*(A prompt-leak example: the attacker asks the model to reveal its own system prompt.)*
 <p><em>Figure: Example of a prompt leak attack</em></p>
 </div>
 
@@ -584,9 +557,7 @@ The above cases all involve attackers exploiting the working principles of intel
     * Use clear **AIGC identification**, such as stating "This content is generated by AI and is for reference only."
 
 <div align="center">
-<a href="https://img.alicdn.com/imgextra/i4/O1CN01DVaVEV1znDh22vVDw_!!6000000006758-2-tps-955-641.png" target="_blank">
-<img src="https://img.alicdn.com/imgextra/i4/O1CN01DVaVEV1znDh22vVDw_!!6000000006758-2-tps-955-641.png" width="600">
-</a>
+*(An example of inducing an agent application to output harmful content.)*
 <p><em>Figure: Inducing an Agent to Output Harmful Content</em></p>
 </div>
 
@@ -619,9 +590,7 @@ When malicious instructions or code are generated, the agent might invoke its in
     * **Set Circuit Breakers**: Set clear resource limits for each task.
 
 <div align="center"> 
-<a href="https://img.alicdn.com/imgextra/i3/O1CN01qem3fe1reVEF51RyS_!!6000000005656-2-tps-1618-545.png" target="_blank"> 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01qem3fe1reVEF51RyS_!!6000000005656-2-tps-1618-545.png" width="900"> 
-</a> 
+*(An example attack against an AI-agent application.)* 
 <p><em>Figure: AI-Agent attack example</em></p>
 </div>
 
@@ -644,9 +613,7 @@ This kind of attack is known as a **resource exhaustion DDoS attack**.
     * **Application Layer Rate Limiting**: Set call frequency or computational limits.
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i3/O1CN0103fJ8L297DWnF9nBO_!!6000000008020-2-tps-1316-975.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i3/O1CN0103fJ8L297DWnF9nBO_!!6000000008020-2-tps-1316-975.png" width="700">
-    </a>
+    *(A DDoS attack flooding the LLM service.)*
     <p><em>Figure: DDoS Attack</em></p>
 </div>
 
@@ -671,9 +638,7 @@ For further information, refer to [Overview of ECS Security Capabilities](https:
 The following figure illustrates common security risks along the "full chain" of development, deployment, and usage of LLM applications.
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i3/O1CN018gmmMH258M34pYQSI_!!6000000007481-2-tps-1054-763.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i3/O1CN018gmmMH258M34pYQSI_!!6000000007481-2-tps-1054-763.png" width="800">
-    </a>
+    *(Overview of security risks across the full chain of an LLM application.)*
     <p><em>Figure: Overview of Full Chain Security Risks in LLM Applications</em></p>
 </div>
 
@@ -722,9 +687,7 @@ Core principles: **Reduce the attack surface, establish a baseline, and implemen
 * **Principle of Least Privilege**: Use **RAM**.
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i2/O1CN01FyYFXe1ijhBm0wF0g_!!6000000004449-2-tps-5052-2822.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i2/O1CN01FyYFXe1ijhBm0wF0g_!!6000000004449-2-tps-5052-2822.png" width="1200">
-    </a>
+    *(Cloud infrastructure security deployment layout.)*
     <p><em>Figure: Cloud Infrastructure Security Layout</em></p>
 </div>
 
@@ -746,23 +709,17 @@ Core principle: **Never Trust, Always Verify**.
 - **Remote Attestation**: Verify hardware and software integrity before trust.
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i2/O1CN01AvgEOy1PWtPyDGNf7_!!6000000001849-2-tps-3820-1981.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i2/O1CN01AvgEOy1PWtPyDGNf7_!!6000000001849-2-tps-3820-1981.png" width="800">
-    </a>
+    *(Boot chain of trust — each module is measured and verified step by step during boot.)*
     <p><em>Figure: Chain of Trust in Boot Process</em></p>
 </div>
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i4/O1CN01N7FTYs1tbsBLW4p6S_!!6000000005921-2-tps-2528-1096.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i4/O1CN01N7FTYs1tbsBLW4p6S_!!6000000005921-2-tps-2528-1096.png" width="1000">
-    </a>
+    *(Intel Xeon full-stack confidential computing solution.)*
     <p><em>Figure: Intel® Xeon Full Stack Confidential Computing Solution</em></p>
 </div>
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i2/O1CN01L2duze1s3h0nuvMco_!!6000000005711-2-tps-710-491.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i2/O1CN01L2duze1s3h0nuvMco_!!6000000005711-2-tps-710-491.png" width="600">
-    </a>
+    *(A Trusted Execution Environment isolates sensitive computation from the rest of the system.)*
     <p><em>Figure: Trusted Execution Environment</em></p>
 </div>
 
@@ -775,9 +732,7 @@ Steps:
 3. **Decrypt and Run Inference**: Load plaintext model into GPU memory within TEE.
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i3/O1CN01sZWVff1p4f0skZzcG_!!6000000005307-2-tps-1974-725.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i3/O1CN01sZWVff1p4f0skZzcG_!!6000000005307-2-tps-1974-725.png" width="1200">
-    </a>
+    *(Secure LLM inference inside a heterogeneous confidential computing environment.)*
     <p><em>Figure: Secure LLM Inference in Heterogeneous Confidential Computing Environment</em></p>
 </div>
 
@@ -826,9 +781,11 @@ Ensure users can only retrieve knowledge within their permission scope.
 * **Vector Encryption**: Use DCPE to preserve retrieval while protecting semantics.
 
 <div align="center">
-    <a href="https://img.alicdn.com/imgextra/i1/O1CN01l1EXEz1TfpbCseWkd_!!6000000002410-2-tps-1571-1372.png" target="_blank">
-        <img src="https://img.alicdn.com/imgextra/i1/O1CN01l1EXEz1TfpbCseWkd_!!6000000002410-2-tps-1571-1372.png" width="700">
-    </a>
+    *Figure (translated): dual encryption scheme for RAG.*
+
+```text
+[Documents] -> [Encrypted storage in knowledge base] -> [Encrypted retrieval] -> [Secure answer generation]
+```
     <p><em>Figure: Dual Encryption Scheme for RAG</em></p>
 </div>
 
